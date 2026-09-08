@@ -432,9 +432,6 @@ function tickClock() {
   if (left <= 0) {
     item.className = 'meta-item shut';
     text.innerHTML = 'Kitchens closed for today \u00b7 <strong>tomorrow\u2019s menu arrives in the morning</strong>';
-    $('heroTitle').textContent = 'Today\u2019s menu';
-    $('heroSub').textContent = 'Ordering closed at ' + CUTOFF.hour + ':' + String(CUTOFF.minute).padStart(2, '0')
-      + ' AM. Browse what was cooked today, then come back before the cutoff tomorrow.';
     return;
   }
   const h = Math.floor(left / 3600e3), m = Math.floor(left / 60e3) % 60, s = Math.floor(left / 1e3) % 60;
