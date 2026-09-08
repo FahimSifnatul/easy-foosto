@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
+<title>Foosto Lunch — আজকের ঘরোয়া রান্না</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -290,7 +290,7 @@
     box-shadow:0 -8px 30px rgba(0,0,0,0.25);
     transform:translateY(100%);
     transition:transform .28s cubic-bezier(.32,.72,0,1);
-    max-height:92vh; overflow-y:auto;
+    max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y;
     padding:18px 20px calc(22px + env(safe-area-inset-bottom));
   }
   .sheet.show{ transform:translateY(0); }
@@ -643,6 +643,10 @@
     </div>
 
     <button type="submit" class="cta-primary" id="profileSaveBtn">Save details</button>
+    <div class="confirm-banner" id="profileSavedBanner">
+      <svg viewBox="0 0 24 24"><use href="#ic-hash"/></svg>
+      <span>Saved — this autofills your next order.</span>
+    </div>
     <button type="button" class="cta-secondary" id="profileClearBtn">Clear saved details</button>
   </form>
 </div>
@@ -976,6 +980,35 @@
   var orderForm = document.getElementById('orderForm');
   var currentItem = null, currentChef = null, qty = 1;
 
+  /* overflow:hidden on <body> is unreliable on iOS Safari and several
+     in-app browsers (Facebook's included) — it can fail to block
+     background scroll, or leave the page stuck after closing. Locking
+     via position:fixed + restoring scroll position is the technique
+     that actually works everywhere. */
+  var scrollLockY = 0, scrollLockCount = 0;
+  function lockBodyScroll(){
+    if (scrollLockCount === 0){
+      scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '-' + scrollLockY + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+    }
+    scrollLockCount++;
+  }
+  function unlockBodyScroll(){
+    scrollLockCount = Math.max(0, scrollLockCount - 1);
+    if (scrollLockCount === 0){
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollLockY);
+    }
+  }
+
   /* ---------- Saved delivery details: save once in this browser, reuse on every order ---------- */
   var STORAGE_KEY = 'foosto-tiffin-customer-details';
   var reqOrderFields = ['fPhone', 'fName', 'fAddress'];
@@ -1022,15 +1055,15 @@
     document.getElementById('pAddress').value = saved.address || '';
     scrim.classList.add('show');
     profileSheet.classList.add('show');
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
     setTimeout(function(){ document.getElementById('pPhone').focus(); }, 260);
   }
   function closeProfileSheet(){
     profileSheet.classList.remove('show');
     if (!sheet.classList.contains('show')){
       scrim.classList.remove('show');
-      document.body.style.overflow = '';
     }
+    unlockBodyScroll();
   }
   profileBtn.addEventListener('click', openProfileSheet);
   document.getElementById('profileClose').addEventListener('click', closeProfileSheet);
@@ -1047,7 +1080,12 @@
       email: document.getElementById('pEmail').value.trim(),
       address: document.getElementById('pAddress').value.trim()
     });
-    closeProfileSheet();
+    var banner = document.getElementById('profileSavedBanner');
+    banner.classList.add('show');
+    setTimeout(function(){
+      banner.classList.remove('show');
+      closeProfileSheet();
+    }, 750);
   });
   document.getElementById('profileClearBtn').addEventListener('click', function(){
     if (!window.confirm('Clear your saved delivery details from this browser?')) return;
@@ -1107,7 +1145,7 @@
 
     scrim.classList.add('show');
     sheet.classList.add('show');
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
     if (!reviewMode){
       setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260);
     }
@@ -1116,8 +1154,8 @@
     sheet.classList.remove('show');
     if (!profileSheet.classList.contains('show')){
       scrim.classList.remove('show');
-      document.body.style.overflow = '';
     }
+    unlockBodyScroll();
   }
   document.getElementById('sheetClose').addEventListener('click', closeSheet);
   scrim.addEventListener('click', function(){
