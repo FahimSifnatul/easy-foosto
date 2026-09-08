@@ -18,7 +18,7 @@
   --brick:#A2402F; --brick-bg:#F1D6CC;
   --border:#DDCBA6; --focus:#7A4E12;
   --shadow:0 1px 2px rgba(43,29,18,.10);
-  --radius-m:12px; --maxw:940px; --barH:210px;
+  --radius-m:12px; --maxw:940px; --barH:0px;
   --display:'Baloo Da 2','Hind Siliguri',sans-serif;
 }
 @media (prefers-color-scheme:dark){
@@ -45,33 +45,45 @@ img{max-width:100%;display:block}
 .app{max-width:var(--maxw);margin:0 auto;padding:0 18px 90px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ---------- Top bar ---------- */
-.topbar{position:sticky;top:0;z-index:30;background:var(--brand-dark);color:#F3E9D2;
-  padding-top:max(14px,env(safe-area-inset-top));box-shadow:0 6px 18px rgba(0,0,0,.18)}
-.topbar-inner{max-width:var(--maxw);margin:0 auto;padding:0 18px 12px}
-.brand-row{display:flex;align-items:center;gap:10px}
-.brand-mark{width:34px;height:34px;flex:none;color:#E3AF3F}
-.brand-name{font-family:var(--display);font-size:1.35rem;font-weight:700;letter-spacing:.2px;line-height:1.2}
-.brand-tagline{font-size:.82rem;color:#D8C6A3;margin-top:1px}
+/* ---------- Masthead: scrolls away with the page ---------- */
+.masthead{background:var(--brand-dark);color:#F3E9D2;
+  padding-top:max(12px,env(safe-area-inset-top))}
+.masthead-inner{max-width:var(--maxw);margin:0 auto;padding:0 18px 11px;
+  display:flex;flex-wrap:wrap;gap:9px 20px;align-items:center;justify-content:space-between}
+.brand-row{display:flex;align-items:center;gap:9px}
+.brand-mark{width:30px;height:30px;flex:none;color:#E3AF3F}
+.brand-name{font-family:var(--display);font-size:1.2rem;font-weight:700;letter-spacing:.2px;line-height:1.2}
+.brand-tagline{font-size:.76rem;color:#D8C6A3;margin-top:0}
 
-.meta-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:12px;
-  font-size:.82rem;color:#E7D9BA}
+.meta-row{display:flex;flex-wrap:wrap;gap:6px 15px;align-items:center;
+  font-size:.78rem;color:#E7D9BA}
 .meta-item{display:flex;align-items:center;gap:6px}
-.meta-item svg{width:15px;height:15px;flex:none;color:#E3AF3F}
+.meta-item svg{width:14px;height:14px;flex:none;color:#E3AF3F}
 .meta-item strong{color:#FBF3DE;font-weight:600}
 .meta-item.urgent strong{color:#E3AF3F}
 .meta-item.shut svg{color:#C08D6F}
 
-.search-row{margin-top:12px;display:flex;gap:8px}
+/* ---------- Controls: the only thing that follows you down ---------- */
+.controls{background:var(--brand-dark);color:#F3E9D2}
+.controls-inner{max-width:var(--maxw);margin:0 auto;padding:0 18px 10px}
+.controls.docked{position:fixed;top:0;left:0;right:0;z-index:30;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);padding-top:max(8px,env(safe-area-inset-top))}
+.controls.docked .controls-inner{padding-bottom:8px}
+.controls.docked .search-input{padding-top:7px;padding-bottom:7px}
+.controls.docked .tool-btn{padding-top:0;padding-bottom:0;height:34px}
+.controls.docked .fbar{margin-top:7px}
+.dock-spacer{height:0}
+
+.search-row{padding-top:10px;display:flex;gap:8px}
 .search-wrap{position:relative;flex:1;min-width:0}
 .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);
   width:17px;height:17px;color:#B7A481;pointer-events:none}
-.search-input{width:100%;padding:10px 14px 10px 36px;border-radius:var(--radius-m);
+.search-input{width:100%;padding:9px 14px 9px 36px;border-radius:var(--radius-m);
   border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);
   color:#FBF3DE;font:inherit;font-size:.95rem}
 .search-input::placeholder{color:#B7A481}
 .search-input:focus-visible{outline:2.5px solid #E3AF3F;outline-offset:1px}
-.tool-btn{flex:none;padding:0 15px;border-radius:var(--radius-m);
+.tool-btn{flex:none;height:38px;padding:0 14px;border-radius:var(--radius-m);
   border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);
   color:#F3E9D2;font-size:.87rem;font-weight:600}
 .tool-btn:hover{background:rgba(255,255,255,.15)}
@@ -84,7 +96,8 @@ img{max-width:100%;display:block}
    media query — that is what made the toggle look dead on desktop. */
 .panel[hidden]{display:none}
 @media(min-width:700px){
-  .panel{grid-template-columns:minmax(140px,1fr) minmax(180px,1.3fr) auto;gap:16px;align-items:center}
+  .panel{grid-template-columns:minmax(140px,1fr) minmax(180px,1.3fr) auto;gap:10px 16px;align-items:center}
+  .panel .rail-field{grid-column:1/-1}
 }
 .field > span{display:block;font-size:.71rem;color:#C6B392;margin-bottom:3px;letter-spacing:.01em}
 .field > span b{color:#E3AF3F;font-weight:600}
@@ -105,17 +118,17 @@ img{max-width:100%;display:block}
 .group-toggle[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
 /* Chef rail doubles as the chef multi-select: tap to filter, tap again to drop. */
-.chip-rail{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:2px;scrollbar-width:none}
+.chip-rail{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chip-rail::-webkit-scrollbar{display:none}
-.chip{flex:none;padding:7px 14px;border-radius:999px;font-size:.85rem;font-weight:600;
+.chip{flex:none;padding:6px 12px;border-radius:999px;font-size:.8rem;font-weight:600;
   background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.12);
   white-space:nowrap;transition:background .15s ease,color .15s ease}
 .chip:hover{background:rgba(255,255,255,.14)}
 .chip[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 .chip .n{opacity:.65;font-weight:500;margin-left:5px}
 
-.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:11px;
-  font-size:.82rem;color:#D8C6A3}
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px 11px;margin-top:9px;
+  font-size:.79rem;color:#D8C6A3}
 .fchip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 5px 0 10px;
   border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
   font-size:.78rem;max-width:210px}
@@ -127,7 +140,7 @@ img{max-width:100%;display:block}
 .clear-all[hidden]{display:none}
 
 /* ---------- Hero ---------- */
-.hero{padding:30px 0 18px}
+.hero{padding:26px 0 20px}
 .hero h1{font-size:clamp(1.7rem,5vw,2.4rem);font-weight:700;color:var(--ink);max-width:19ch}
 .hero p{margin:10px 0 0;color:var(--ink-soft);font-size:1rem;max-width:56ch}
 .hero-stats{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
@@ -135,7 +148,7 @@ img{max-width:100%;display:block}
 .hero-stat span{font-size:.8rem;color:var(--ink-soft)}
 
 /* ---------- Chef tiers ---------- */
-.tier{margin-top:8px;scroll-margin-top:calc(var(--barH) + 14px);
+.tier{margin-top:8px;scroll-margin-top:calc(var(--barH, 0px) + 14px);
   content-visibility:auto;contain-intrinsic-size:0 460px}
 .ghead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
   padding:14px 0 10px 14px;margin-top:22px;border-left:4px solid var(--gold)}
@@ -274,8 +287,8 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
   <symbol id="ic-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
 </svg>
 
-<div class="topbar" role="banner">
-  <div class="topbar-inner">
+<header class="masthead" role="banner">
+  <div class="masthead-inner">
     <div class="brand-row">
       <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#ic-tiffin"/></svg>
       <div>
@@ -297,7 +310,27 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
         Menu changed <strong id="freshness"></strong><span id="freshNote"></span>
       </span>
     </div>
+  </div>
+</header>
 
+<section class="hero-wrap">
+  <div class="app">
+    <div class="hero">
+      <h1 id="heroTitle">Today's home-cooked lunch</h1>
+      <p id="heroSub">Cooked this morning by home chefs across Dhaka, delivered to your desk.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><b id="statChefs">–</b><span>home chefs today</span></div>
+        <div class="hero-stat"><b id="statDishes">–</b><span>dishes on the menu</span></div>
+        <div class="hero-stat"><b id="statPrice">–</b><span>price range</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sits in normal flow at rest; pins itself to the top once you scroll past
+     it, so the search stays reachable without a tall header following you. -->
+<div class="controls" id="controls">
+  <div class="controls-inner">
     <div class="search-row">
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-search"/></svg>
@@ -305,7 +338,7 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
                placeholder="Search dishes, chefs or menu codes"
                aria-label="Search dishes, chefs or menu codes">
       </div>
-      <button class="tool-btn" id="toggleFilters" aria-expanded="false" aria-controls="panel">Sort &amp; price</button>
+      <button class="tool-btn" id="toggleFilters" aria-expanded="false" aria-controls="panel">Filters</button>
     </div>
 
     <div class="panel" id="panel" hidden>
@@ -330,9 +363,11 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
         <span>View</span>
         <button class="group-toggle" id="groupBtn" aria-pressed="true">Grouped by chef</button>
       </div>
+      <div class="field rail-field">
+        <span>Chefs</span>
+        <div class="chip-rail" id="chipRail" aria-label="Filter by chef"></div>
+      </div>
     </div>
-
-    <div class="chip-rail" id="chipRail" aria-label="Filter by chef"></div>
 
     <div class="fbar">
       <span id="count" aria-live="polite" role="status"></span>
@@ -341,18 +376,9 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
     </div>
   </div>
 </div>
+<div class="dock-spacer" id="dockSpacer"></div>
 
 <div class="app">
-  <section class="hero">
-    <h1 id="heroTitle">Today's home-cooked lunch</h1>
-    <p id="heroSub">Cooked this morning by home chefs across Dhaka, delivered to your desk.</p>
-    <div class="hero-stats">
-      <div class="hero-stat"><b id="statChefs">–</b><span>home chefs today</span></div>
-      <div class="hero-stat"><b id="statDishes">–</b><span>dishes on the menu</span></div>
-      <div class="hero-stat"><b id="statPrice">–</b><span>price range</span></div>
-    </div>
-  </section>
-
   <main id="main"></main>
 
   <footer class="note">
@@ -858,18 +884,46 @@ $('chipRail').addEventListener('wheel', (e) => {
 }, { passive: false });
 
 $('topFab').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-window.addEventListener('scroll', () => {
-  $('topFab').classList.toggle('show', window.scrollY > 700);
-}, { passive: true });
 
-// Chef sections use scroll-margin-top so anchors clear the sticky topbar,
-// whose height changes when the sort panel opens or filter chips wrap.
-const topbar = document.querySelector('.topbar');
-const setBarH = () => document.documentElement.style
-  .setProperty('--barH', topbar.getBoundingClientRect().height + 'px');
-if (window.ResizeObserver) new ResizeObserver(setBarH).observe(topbar);
-window.addEventListener('resize', setBarH);
-setBarH();
+/* --- Docking the controls ----------------------------------------------
+   The masthead scrolls away; only this block follows you down, and it
+   compacts itself when it does. It is a single DOM node that switches to
+   position:fixed rather than a second copy of the search box, so focus, the
+   typed query and the open/closed panel all survive the transition. The
+   spacer takes over its height so the list doesn't jump up underneath it. */
+const controls = $('controls'), spacer = $('dockSpacer');
+let dockAt = 0;
+
+function measureDock() {
+  if (controls.classList.contains('docked')) return;   // origin is only valid at rest
+  dockAt = controls.getBoundingClientRect().top + window.scrollY;
+}
+function updateDock() {
+  const should = window.scrollY > dockAt;
+  if (should === controls.classList.contains('docked')) return;
+  controls.classList.toggle('docked', should);
+  spacer.style.height = should ? controls.offsetHeight + 'px' : '0px';
+  document.documentElement.style.setProperty('--barH',
+    (should ? controls.offsetHeight : 0) + 'px');
+}
+function onScroll() {
+  updateDock();
+  $('topFab').classList.toggle('show', window.scrollY > 400);
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', () => { measureDock(); updateDock(); });
+// The panel opening or chips wrapping changes the docked height.
+if (window.ResizeObserver) {
+  new ResizeObserver(() => {
+    if (controls.classList.contains('docked')) {
+      spacer.style.height = controls.offsetHeight + 'px';
+      document.documentElement.style.setProperty('--barH', controls.offsetHeight + 'px');
+    } else {
+      measureDock();
+    }
+  }).observe(controls);
+}
+measureDock();
 
 tickClock(); setInterval(tickClock, 1000);
 boot();
