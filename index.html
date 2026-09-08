@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Foosto Lunch — আজকের ঘরোয়া রান্না</title>
+<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://menu.foosto.com">
@@ -77,25 +77,30 @@ img{max-width:100%;display:block}
 .tool-btn:hover{background:rgba(255,255,255,.15)}
 .tool-btn[aria-expanded=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
-.panel{margin-top:10px;padding:13px 14px;border-radius:var(--radius-m);
+.panel{margin-top:9px;padding:9px 12px;border-radius:10px;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-  display:grid;gap:14px}
+  display:grid;gap:9px}
+/* `hidden` must win at every width. Do NOT re-declare .panel[hidden] in a
+   media query — that is what made the toggle look dead on desktop. */
 .panel[hidden]{display:none}
-@media(min-width:700px){.panel,.panel[hidden]{display:grid;grid-template-columns:1fr 1fr auto;align-items:end}}
-.field > span{display:block;font-size:.76rem;color:#C6B392;margin-bottom:5px}
-.field select{width:100%;height:38px;border-radius:9px;font:inherit;font-size:.87rem;
-  background:#2A1F15;color:#F3E9D2;border:1px solid rgba(255,255,255,.16);padding:0 8px}
-.slider{position:relative;height:38px;display:flex;align-items:center}
+@media(min-width:700px){
+  .panel{grid-template-columns:minmax(140px,1fr) minmax(180px,1.3fr) auto;gap:16px;align-items:center}
+}
+.field > span{display:block;font-size:.71rem;color:#C6B392;margin-bottom:3px;letter-spacing:.01em}
+.field > span b{color:#E3AF3F;font-weight:600}
+.field select{width:100%;height:32px;border-radius:8px;font:inherit;font-size:.83rem;
+  background:#2A1F15;color:#F3E9D2;border:1px solid rgba(255,255,255,.16);padding:0 7px}
+.slider{position:relative;height:32px;display:flex;align-items:center}
 .slider .track{position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.18);border-radius:2px}
 .slider .fill{position:absolute;height:3px;background:#E3AF3F;border-radius:2px}
 .slider input{position:absolute;left:0;width:100%;margin:0;background:none;pointer-events:none;
-  -webkit-appearance:none;appearance:none;height:38px}
-.slider input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:19px;height:19px;
+  -webkit-appearance:none;appearance:none;height:32px}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:16px;height:16px;
   border-radius:50%;background:#F3E9D2;border:2px solid #E3AF3F;cursor:grab}
-.slider input::-moz-range-thumb{pointer-events:auto;width:17px;height:17px;border-radius:50%;
+.slider input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;
   background:#F3E9D2;border:2px solid #E3AF3F;cursor:grab}
 .slider input::-moz-range-track{background:none}
-.group-toggle{height:38px;padding:0 14px;border-radius:999px;font-size:.82rem;font-weight:600;
+.group-toggle{height:32px;padding:0 13px;border-radius:999px;font-size:.78rem;font-weight:600;
   background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.14);white-space:nowrap}
 .group-toggle[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
@@ -274,7 +279,7 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
     <div class="brand-row">
       <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#ic-tiffin"/></svg>
       <div>
-        <div class="brand-name">Foosto Lunch</div>
+        <div class="brand-name">Foosto Tiffin</div>
         <div class="brand-tagline">ঘরের রান্না, আপনার ডেস্কে</div>
       </div>
     </div>
@@ -289,7 +294,7 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
       </span>
       <span class="meta-item" id="freshItem" hidden>
         <svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>
-        Menu updated <strong id="freshness"></strong>
+        Menu changed <strong id="freshness"></strong><span id="freshNote"></span>
       </span>
     </div>
 
@@ -314,7 +319,7 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
         </select>
       </div>
       <div class="field">
-        <span>Price range <span id="priceLabel"></span></span>
+        <span>Price <b id="priceLabel"></b></span>
         <div class="slider">
           <div class="track"></div><div class="fill" id="fill"></div>
           <input type="range" id="pmin" aria-label="Minimum price">
@@ -750,12 +755,34 @@ async function boot() {
     const data = await loadMenu();
     state.items = data.items;
     buildFilters();
-    const when = new Date(data.changedAt || data.checkedAt);
-    $('freshness').textContent = when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    $('freshItem').hidden = false;
+    showFreshness(data);
     render();
   } catch (err) {
     showError(err.message);
+  }
+}
+
+/* Two different facts, and conflating them is what makes a live mirror look
+   broken: changedAt is when Foosto's menu last actually differed, checkedAt is
+   when we last looked. An overnight menu legitimately doesn't change for
+   hours, so only checkedAt can tell you the pipeline is still alive. */
+function showFreshness(data) {
+  const hhmm = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const changed = new Date(data.changedAt || data.checkedAt);
+  const checked = new Date(data.checkedAt || data.changedAt);
+  const ageMin = (Date.now() - checked.getTime()) / 60000;
+
+  $('freshness').textContent = hhmm(changed);
+  $('freshItem').hidden = false;
+
+  if (ageMin > 150) {
+    // The Action commits a heartbeat at least hourly, so this means it stopped.
+    $('cutoffItem').insertAdjacentHTML('afterend',
+      '<span class="meta-item shut" id="staleWarn">' + icon('ic-refresh')
+      + '<strong>Mirror may be stale</strong> \u2014 last checked ' + hhmm(checked) + '</span>');
+    $('freshNote').textContent = '';
+  } else if (checked - changed > 5 * 60000) {
+    $('freshNote').textContent = ' \u00b7 checked ' + hhmm(checked);
   }
 }
 
@@ -781,7 +808,7 @@ $('groupBtn').addEventListener('click', (e) => {
 $('toggleFilters').addEventListener('click', (e) => {
   const open = $('panel').hidden;
   $('panel').hidden = !open;
-  e.target.setAttribute('aria-expanded', String(open));
+  e.currentTarget.setAttribute('aria-expanded', String(open));
 });
 $('chipRail').addEventListener('click', (e) => {
   const b = e.target.closest('.chip');
@@ -814,6 +841,21 @@ main.addEventListener('click', (e) => {
   const item = state.items.find((i) => i.code === btn.dataset.code);
   if (item) openSheet(item);
 });
+
+// A horizontal rail under a vertical page traps the wheel: without this the
+// page scrolls away instead of moving the chef list. Only hijack the wheel
+// when the rail actually has somewhere left to go, so the page still scrolls
+// once you reach either end.
+$('chipRail').addEventListener('wheel', (e) => {
+  const el = e.currentTarget;
+  const max = el.scrollWidth - el.clientWidth;
+  if (max <= 0) return;
+  const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+  if (delta === 0) return;
+  if ((delta < 0 && el.scrollLeft === 0) || (delta > 0 && el.scrollLeft >= max - 1)) return;
+  e.preventDefault();
+  el.scrollLeft += delta;
+}, { passive: false });
 
 $('topFab').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 window.addEventListener('scroll', () => {
