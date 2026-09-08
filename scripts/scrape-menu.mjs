@@ -93,8 +93,31 @@ function toChunks(html) {
     .filter(Boolean);
 }
 
+/**
+ * Foosto-dependent. A label and its value may sit in the SAME element:
+ *     <h6>Price : 191.0</h6>
+ * or in separate ones:
+ *     <h6>Price :<span>191.0</span></h6>
+ * The second form splits into two chunks and would break the label regexes,
+ * so stitch a dangling "Xxx :" back together with the chunk that follows it.
+ */
+function mergeSplitLabels(chunks) {
+  const dangling = /^(Chef|Price|Menu\s*Code|Available)\s*:\s*$/i;
+  const out = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const next = chunks[i + 1];
+    if (dangling.test(chunks[i]) && next && !next.startsWith(IMG_TOKEN)) {
+      out.push(chunks[i].replace(/\s+$/, '') + ' ' + next);
+      i++;
+    } else {
+      out.push(chunks[i]);
+    }
+  }
+  return out;
+}
+
 function parseMenu(html) {
-  const chunks = toChunks(html);
+  const chunks = mergeSplitLabels(toChunks(html));
   const items = [];
 
   let chef = null;
@@ -185,14 +208,33 @@ async function main() {
   if (!res.ok) throw new Error(`Foosto returned HTTP ${res.status}`);
 
   const html = await res.text();
+  console.log(`Fetched ${html.length} bytes from ${SOURCE_URL}`);
+
   const items = parseMenu(html);
   const problems = validate(items);
+
+  if (problems.length || process.argv.includes('--debug')) {
+    // Print what the runner actually saw. Without this a failure is just
+    // "exit code 1" and you're guessing about a page you can't see from here.
+    const chunks = mergeSplitLabels(toChunks(html));
+    console.error(`\n--- first 60 of ${chunks.length} text chunks ---`);
+    for (const c of chunks.slice(0, 60)) {
+      console.error('  | ' + (c.length > 110 ? c.slice(0, 110) + '\u2026' : c));
+    }
+    console.error('--- end ---\n');
+  }
 
   if (problems.length) {
     console.error('Scrape failed. menu.js was NOT written.\n');
     for (const p of problems.slice(0, 25)) console.error('  - ' + p);
     if (problems.length > 25) console.error(`  ... and ${problems.length - 25} more`);
-    console.error('\nCheck the LABELS regexes in scripts/scrape-menu.mjs against the live page.');
+    if (html.length < 5000) {
+      console.error('\nThe page was tiny. Foosto may be blocking the runner, or serving'
+        + ' a JS-only shell that needs a headless browser.');
+    } else {
+      console.error('\nCompare the chunks above against the LABELS regexes at the top of'
+        + ' this file. If a label was reworded, update the regex to match.');
+    }
     process.exit(1);
   }
 
