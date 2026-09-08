@@ -610,10 +610,6 @@ function buildFilters() {
   $('chipRail').innerHTML = [...counts.keys()].sort((a, b) => a.localeCompare(b)).map((c) =>
     '<button class="chip" data-chef="' + esc(c) + '" aria-pressed="false">'
     + esc(c) + '<span class="n">' + counts.get(c) + '</span></button>').join('');
-
-  $('statChefs').textContent = counts.size;
-  $('statDishes').textContent = state.items.length;
-  $('statPrice').textContent = range(lo, hi);
 }
 
 /* --- Order sheet -------------------------------------------------------- */
