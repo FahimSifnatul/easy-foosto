@@ -41,11 +41,42 @@ jobs:
 
       - name: Commit if the menu changed
         if: steps.scrape.outputs.changed == 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add menu.js
-          git commit -m "Menu refresh $(date -u +'%Y-%m-%d %H:%MZ')"
-          # A run can overlap a push from the previous one; rebase rather than fail.
-          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
-          git push
+
+          # menu.js is regenerated in full every run, so there is never anything
+          # to merge: we just need the new file to land on the current branch tip.
+          #
+          # A plain `git push` breaks in two situations that both happen here:
+          #   1. Re-running an OLD run. actions/checkout restores that run's
+          #      original commit, so the branch is behind and can never
+          #      fast-forward. This is the "fetch first" rejection.
+          #   2. Two runs overlapping, where the other one pushes first.
+          # Re-anchoring to origin before each attempt handles both.
+          for attempt in 1 2 3; do
+            cp menu.js "$RUNNER_TEMP/menu.js"
+            # Explicit refspec: actions/checkout does not always leave a
+            # remote-tracking ref we can reset onto, so write one ourselves.
+            git fetch --depth=1 origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            git reset --hard "origin/$BRANCH"
+            cp "$RUNNER_TEMP/menu.js" menu.js
+            git add menu.js
+
+            if git diff --cached --quiet; then
+              echo "Branch already has this exact menu. Nothing to commit."
+              exit 0
+            fi
+
+            git commit -m "Menu refresh $(date -u +'%Y-%m-%d %H:%MZ')"
+            if git push origin "HEAD:$BRANCH"; then
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt; another run got there first. Retrying."
+            sleep $(( attempt * 5 ))
+          done
+
+          echo "Could not push after 3 attempts." >&2
+          exit 1
