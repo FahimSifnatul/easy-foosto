@@ -43,6 +43,10 @@ import path from 'node:path';
 const SOURCE_URL = 'https://menu.foosto.com/';
 const OUT_FILE = path.resolve(process.argv[2] ?? 'menu.js');
 const FETCH_TIMEOUT_MS = 30_000;
+// Commit at least this often even when nothing changed, so the page can prove
+// the mirror is alive. Without it, an overnight menu that legitimately never
+// changes is indistinguishable from a workflow that stopped running.
+const HEARTBEAT_MS = 60 * 60_000;
 
 /* --- Foosto-dependent: the visible labels we anchor on ------------------- */
 const LABELS = {
@@ -184,12 +188,11 @@ function validate(items) {
   return problems;
 }
 
-async function previousItems() {
+async function previousPayload() {
   if (!existsSync(OUT_FILE)) return null;
   try {
     const txt = await readFile(OUT_FILE, 'utf8');
-    const json = txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1);
-    return JSON.parse(json).items ?? null;
+    return JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
   } catch {
     return null;
   }
@@ -238,14 +241,17 @@ async function main() {
     process.exit(1);
   }
 
-  const prev = await previousItems();
-  const unchanged = prev && JSON.stringify(prev) === JSON.stringify(items);
+  const prev = await previousPayload();
+  const contentChanged = !prev || JSON.stringify(prev.items) !== JSON.stringify(items);
+  const lastCheck = prev?.checkedAt ? Date.parse(prev.checkedAt) : 0;
+  const heartbeatDue = Date.now() - lastCheck > HEARTBEAT_MS;
+  const shouldCommit = contentChanged || heartbeatDue;
 
   const now = new Date().toISOString();
   const payload = {
     source: SOURCE_URL,
-    changedAt: unchanged ? JSON.parse((await readFile(OUT_FILE, 'utf8')).match(/\{[\s\S]*\}/)[0]).changedAt : now,
-    checkedAt: now,
+    changedAt: contentChanged ? now : prev.changedAt,   // when the menu last differed
+    checkedAt: now,                                     // when we last looked
     count: items.length,
     items,
   };
@@ -255,10 +261,13 @@ async function main() {
 
   const prices = items.map((i) => i.price);
   console.log(`Parsed ${items.length} items from ${new Set(items.map((i) => i.chef)).size} chefs.`);
-  console.log(`Price range ${Math.min(...prices)}-${Math.max(...prices)}. Content ${unchanged ? 'unchanged' : 'CHANGED'}.`);
+  console.log(`Price range ${Math.min(...prices)}-${Math.max(...prices)}.`);
+  console.log(contentChanged ? 'Menu CHANGED since last run - committing.'
+    : heartbeatDue ? 'Menu unchanged, but the heartbeat is due - committing anyway.'
+    : 'Menu unchanged and heartbeat still fresh - nothing to commit.');
 
   if (process.env.GITHUB_OUTPUT) {
-    await writeFile(process.env.GITHUB_OUTPUT, `changed=${unchanged ? 'false' : 'true'}\n`, { flag: 'a' });
+    await writeFile(process.env.GITHUB_OUTPUT, `changed=${shouldCommit}\n`, { flag: 'a' });
   }
 }
 
