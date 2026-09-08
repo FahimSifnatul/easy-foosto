@@ -118,13 +118,16 @@
 
   .chip-rail{
     display:flex; gap:8px; overflow-x:auto; margin-top:12px; padding-bottom:2px;
-    scrollbar-width:none;
+    scrollbar-width:none; scroll-snap-type:x proximity;
+    -webkit-mask-image:linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 28px), transparent);
+    mask-image:linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 28px), transparent);
   }
   .chip-rail::-webkit-scrollbar{ display:none; }
   .chip{
     flex:none; padding:7px 14px; border-radius:999px; font-size:0.85rem; font-weight:600;
     background:rgba(255,255,255,0.07); color:#E7D9BA; border:1px solid rgba(255,255,255,0.12);
     cursor:pointer; white-space:nowrap; transition:background .15s ease, color .15s ease;
+    scroll-snap-align:start;
   }
   .chip:hover{ background:rgba(255,255,255,0.14); }
   .chip.active{ background:#E3AF3F; color:#2A1B06; border-color:#E3AF3F; }
@@ -141,6 +144,71 @@
   .hero-stats{ display:flex; gap:22px; margin-top:18px; flex-wrap:wrap; }
   .hero-stat b{ display:block; font-family:'Baloo Da 2',sans-serif; font-size:1.4rem; color:var(--gold); }
   .hero-stat span{ font-size:0.8rem; color:var(--ink-soft); }
+
+  /* ---------- Filter & sort toolbar ---------- */
+  .toolbar{
+    margin-top:20px; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-m); padding:14px 16px 16px; box-shadow:var(--shadow);
+  }
+  .toolbar-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .toolbar-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex:1; min-width:0;
+    background:none; border:none; padding:0; margin:0; cursor:pointer; font-family:inherit;
+  }
+  .toolbar-title{ display:flex; align-items:center; gap:7px; font-weight:700; font-size:0.95rem; color:var(--ink); }
+  .toolbar-title svg{ color:var(--gold); flex:none; }
+  .toolbar-chevron{
+    width:18px; height:18px; color:var(--ink-soft); flex:none; transition:transform .2s ease;
+  }
+  .toolbar.collapsed .toolbar-chevron{ transform:rotate(-90deg); }
+  .toolbar-reset{
+    background:none; border:none; padding:0; margin:0; cursor:pointer; font-family:inherit;
+    color:var(--ink-soft); font-size:0.82rem; text-decoration:underline; text-underline-offset:3px; flex:none;
+  }
+  .toolbar-body{
+    overflow:hidden; max-height:520px; opacity:1; transition:max-height .25s ease, opacity .2s ease;
+  }
+  .toolbar.collapsed .toolbar-body{ max-height:0; opacity:0; pointer-events:none; }
+  .toolbar-row{ margin-top:14px; }
+  .toolbar-label{ display:block; font-size:0.82rem; font-weight:600; color:var(--ink-soft); margin-bottom:7px; }
+  .sort-select{
+    width:100%; padding:10px 12px; border-radius:var(--radius-s); border:1px solid var(--border);
+    background:var(--surface); color:var(--ink); font-size:0.92rem; font-family:inherit;
+  }
+  .sort-select:focus-visible{ outline:2.5px solid var(--focus); outline-offset:1px; }
+
+  .range-values{ display:flex; justify-content:space-between; font-family:'Baloo Da 2',sans-serif; font-size:0.95rem; color:var(--gold); margin-bottom:2px; }
+  .range-track{ position:relative; height:32px; }
+  .range-track::before{
+    content:''; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+    height:4px; background:var(--border); border-radius:2px;
+  }
+  .range-track-fill{
+    position:absolute; top:50%; transform:translateY(-50%); height:4px; background:var(--gold);
+    border-radius:2px; pointer-events:none;
+  }
+  .range-slider{
+    position:absolute; left:0; right:0; top:0; width:100%; height:32px; margin:0;
+    -webkit-appearance:none; appearance:none; background:transparent; pointer-events:none;
+  }
+  .range-slider:focus-visible{ outline:none; }
+  .range-slider::-webkit-slider-runnable-track{ -webkit-appearance:none; background:transparent; height:32px; }
+  .range-slider::-moz-range-track{ background:transparent; height:32px; }
+  .range-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; pointer-events:auto;
+    width:20px; height:20px; margin-top:6px; border-radius:50%; background:var(--gold);
+    border:3px solid var(--surface); box-shadow:0 1px 3px rgba(43,29,18,0.35); cursor:pointer;
+  }
+  .range-slider::-moz-range-thumb{
+    pointer-events:auto; width:20px; height:20px; border-radius:50%; background:var(--gold);
+    border:3px solid var(--surface); box-shadow:0 1px 3px rgba(43,29,18,0.35); cursor:pointer;
+  }
+
+  .toolbar-checkbox{
+    display:flex; align-items:center; gap:9px; margin-top:16px; font-size:0.88rem; color:var(--ink); cursor:pointer;
+  }
+  .toolbar-checkbox input{ width:18px; height:18px; accent-color:var(--gold); flex:none; }
+  .toolbar-result{ margin-top:8px; font-size:0.8rem; color:var(--ink-faint); }
 
   /* ---------- Chef tiers ---------- */
   .tier{ margin-top:8px; scroll-margin-top:170px; }
@@ -292,8 +360,30 @@
   .cta-primary:active{ transform:scale(0.99); }
   .cta-note{ margin-top:9px; font-size:0.78rem; color:var(--ink-faint); text-align:center; line-height:1.6; }
   .cta-secondary{
-    display:block; text-align:center; margin-top:10px; font-size:0.85rem; color:var(--ink-soft);
-    text-decoration:underline; text-underline-offset:3px;
+    display:block; width:100%; text-align:center; margin-top:10px; font-size:0.85rem; color:var(--ink-soft);
+    text-decoration:underline; text-underline-offset:3px; background:none; border:none; padding:0;
+    cursor:pointer; font-family:inherit;
+  }
+
+  /* ---------- Saved delivery details (save once, reuse every order) ---------- */
+  .profile-row{ margin-top:12px; }
+  .profile-btn{
+    display:flex; align-items:center; justify-content:center; gap:7px; width:100%;
+    background:rgba(255,255,255,0.08); color:#FBF3DE; border:1px solid rgba(255,255,255,0.22);
+    border-radius:999px; padding:9px 16px; font-size:0.83rem; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .profile-btn svg{ width:14px; height:14px; flex:none; }
+  .profile-btn.saved{ background:rgba(82,104,74,0.4); border-color:rgba(140,168,120,0.55); }
+
+  .details-card{ margin-top:16px; background:var(--bg-soft); border-radius:var(--radius-m); padding:12px 14px; }
+  .details-row{ display:flex; justify-content:space-between; gap:14px; padding:6px 0; font-size:0.86rem; }
+  .details-row + .details-row{ border-top:1px dashed var(--border); }
+  .details-label{ color:var(--ink-soft); flex:none; }
+  .details-value{ color:var(--ink); font-weight:600; text-align:right; word-break:break-word; }
+  .details-edit{
+    display:block; margin-top:10px; background:none; border:none; padding:0; cursor:pointer;
+    color:var(--gold); font-weight:700; font-size:0.85rem; text-decoration:underline; text-underline-offset:3px;
+    font-family:inherit;
   }
 
   .copy-panel{
@@ -350,6 +440,12 @@
         <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg> Order by <strong id="cutoffTime">10:20 AM</strong> today</span>
         <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Gulshan · Banani · Tejgaon · Mohakhali · Badda</span>
       </div>
+      <div class="profile-row">
+        <button id="profileBtn" class="profile-btn" type="button">
+          <svg viewBox="0 0 24 24"><use href="#ic-user"/></svg>
+          <span id="profileBtnText">Save my delivery details</span>
+        </button>
+      </div>
       <div class="search-row">
         <svg viewBox="0 0 24 24"><use href="#ic-search"/></svg>
         <input id="searchInput" class="search-input" type="search" placeholder="Search a dish or a chef's name" aria-label="Search dishes or chefs">
@@ -369,11 +465,52 @@
       </div>
     </section>
 
+    <section class="toolbar" id="toolbarSection" aria-label="Filter and sort the menu">
+      <div class="toolbar-top">
+        <button type="button" id="toolbarToggle" class="toolbar-toggle" aria-expanded="true" aria-controls="toolbarBody">
+          <span class="toolbar-title">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+            Filter &amp; sort
+          </span>
+          <svg class="toolbar-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" id="resetFiltersBtn" class="toolbar-reset">Reset</button>
+      </div>
+
+      <p class="toolbar-result" id="filterResultCount">Showing all dishes</p>
+
+      <div id="toolbarBody" class="toolbar-body">
+        <div class="toolbar-row">
+          <label class="toolbar-label" for="sortSelect">Sort by</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="default">Featured order</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+
+        <div class="toolbar-row" id="priceRangeRow">
+          <label class="toolbar-label">Price range</label>
+          <div class="range-values"><span id="priceMinLabel">৳0</span><span id="priceMaxLabel">৳0</span></div>
+          <div class="range-track">
+            <div class="range-track-fill" id="rangeFill"></div>
+            <input type="range" id="priceMinRange" class="range-slider" aria-label="Minimum price">
+            <input type="range" id="priceMaxRange" class="range-slider" aria-label="Maximum price">
+          </div>
+        </div>
+
+        <label class="toolbar-checkbox">
+          <input type="checkbox" id="availOnlyCheckbox" checked>
+          <span>Available only (hide sold-out dishes)</span>
+        </label>
+      </div>
+    </section>
+
     <section id="menuList" aria-label="Today's menu"></section>
     <div id="emptyState" class="empty-state" style="display:none">
-      <h3>No dishes match that search</h3>
-      <p>Try a shorter word, or search a chef's name instead.</p>
-      <button id="clearSearchBtn" type="button">Clear search</button>
+      <h3>No dishes match your search or filters</h3>
+      <p>Try a shorter word, a wider price range, or tap Reset above.</p>
+      <button id="clearSearchBtn" type="button">Reset filters</button>
     </div>
   </main>
 
@@ -416,29 +553,40 @@
       </div>
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="fPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
-      <input class="field-input" id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
+    <div id="savedDetailsCard" class="details-card" style="display:none">
+      <div class="details-row"><span class="details-label">Name</span><span class="details-value" id="savedName">–</span></div>
+      <div class="details-row"><span class="details-label">Phone</span><span class="details-value" id="savedPhone">–</span></div>
+      <div class="details-row" id="savedWhatsappRow" style="display:none"><span class="details-label">WhatsApp</span><span class="details-value" id="savedWhatsapp">–</span></div>
+      <div class="details-row" id="savedEmailRow" style="display:none"><span class="details-label">Email</span><span class="details-value" id="savedEmail">–</span></div>
+      <div class="details-row"><span class="details-label">Address</span><span class="details-value" id="savedAddress">–</span></div>
+      <button type="button" class="details-edit" id="editDetailsBtn">Edit details</button>
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="fName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
-      <input class="field-input" id="fName" name="name" type="text" placeholder="Your full name" required>
-    </div>
+    <div id="detailsFields">
+      <div class="field-group">
+        <label class="field-label" for="fPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
+        <input class="field-input" id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
+      </div>
 
-    <div class="field-group">
-      <label class="field-label" for="fWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
-      <input class="field-input" id="fWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
-    </div>
+      <div class="field-group">
+        <label class="field-label" for="fName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
+        <input class="field-input" id="fName" name="name" type="text" placeholder="Your full name" required>
+      </div>
 
-    <div class="field-group">
-      <label class="field-label" for="fEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
-      <input class="field-input" id="fEmail" name="email" type="email" placeholder="you@example.com">
-    </div>
+      <div class="field-group">
+        <label class="field-label" for="fWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
+        <input class="field-input" id="fWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
+      </div>
 
-    <div class="field-group">
-      <label class="field-label" for="fAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
-      <textarea class="field-input" id="fAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
+      <div class="field-group">
+        <label class="field-label" for="fEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
+        <input class="field-input" id="fEmail" name="email" type="email" placeholder="you@example.com">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="fAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
+        <textarea class="field-input" id="fAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
+      </div>
     </div>
 
     <div class="total-row">
@@ -459,6 +607,43 @@
     </div>
 
     <a class="cta-secondary" id="messengerLink" href="https://www.facebook.com/foosto.bd/" target="_blank" rel="noopener">Prefer chat? Order via Foosto's Messenger instead</a>
+  </form>
+</div>
+
+<div id="profileSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="profileTitle">Your delivery details</h2>
+    <button class="sheet-close" id="profileClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24"><use href="#ic-close"/></svg>
+    </button>
+  </div>
+  <p class="cta-note" style="text-align:left; margin-top:10px;">Saved once in this browser so future orders skip straight to a review screen. Nothing leaves your device until you place an order.</p>
+
+  <form id="profileForm">
+    <div class="field-group">
+      <label class="field-label" for="pPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
+      <input class="field-input" id="pPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="pName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
+      <input class="field-input" id="pName" name="name" type="text" placeholder="Your full name" required>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="pWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
+      <input class="field-input" id="pWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="pEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
+      <input class="field-input" id="pEmail" name="email" type="email" placeholder="you@example.com">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="pAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
+      <textarea class="field-input" id="pAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
+    </div>
+
+    <button type="submit" class="cta-primary" id="profileSaveBtn">Save details</button>
+    <button type="button" class="cta-secondary" id="profileClearBtn">Clear saved details</button>
   </form>
 </div>
 
@@ -578,6 +763,9 @@
       var row = document.createElement('div');
       row.className = 'dish';
       row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
+      row.dataset.price = item.price;
+      row.dataset.available = item.available;
+      row.dataset.originalIndex = totalDishes;
 
       var lowStock = item.available <= 5;
       row.innerHTML =
@@ -614,6 +802,15 @@
     });
   });
 
+  /* Mouse users only have a vertical wheel; convert that into horizontal
+     scroll while the pointer is over the chip rail so every chef name is
+     reachable without a trackpad or touch swipe. */
+  chipRail.addEventListener('wheel', function(e){
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // already a horizontal gesture (trackpad) — let it through
+    e.preventDefault();
+    chipRail.scrollLeft += e.deltaY;
+  }, { passive: false });
+
   var tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
   if ('IntersectionObserver' in window){
     var spy = new IntersectionObserver(function(entries){
@@ -630,31 +827,139 @@
   }
   if (chips[0]) chips[0].classList.add('active');
 
-  /* ---------- Search ---------- */
+  /* ---------- Filter, sort & search (combined) ---------- */
   var searchInput = document.getElementById('searchInput');
   var emptyState = document.getElementById('emptyState');
-  function applySearch(){
+  var sortSelect = document.getElementById('sortSelect');
+  var priceRangeRow = document.getElementById('priceRangeRow');
+  var priceMinRange = document.getElementById('priceMinRange');
+  var priceMaxRange = document.getElementById('priceMaxRange');
+  var rangeFill = document.getElementById('rangeFill');
+  var priceMinLabel = document.getElementById('priceMinLabel');
+  var priceMaxLabel = document.getElementById('priceMaxLabel');
+  var availOnlyCheckbox = document.getElementById('availOnlyCheckbox');
+  var resetFiltersBtn = document.getElementById('resetFiltersBtn');
+  var filterResultCount = document.getElementById('filterResultCount');
+
+  /* ---------- Collapsible toolbar ---------- */
+  var toolbarSection = document.getElementById('toolbarSection');
+  var toolbarToggle = document.getElementById('toolbarToggle');
+  var TOOLBAR_STATE_KEY = 'foosto-tiffin-toolbar-collapsed';
+  function setToolbarCollapsed(collapsed){
+    toolbarSection.classList.toggle('collapsed', collapsed);
+    toolbarToggle.setAttribute('aria-expanded', String(!collapsed));
+    try { localStorage.setItem(TOOLBAR_STATE_KEY, collapsed ? '1' : '0'); } catch(e){ /* storage unavailable, skip silently */ }
+  }
+  toolbarToggle.addEventListener('click', function(){
+    setToolbarCollapsed(!toolbarSection.classList.contains('collapsed'));
+  });
+  var startCollapsed = false;
+  try { startCollapsed = localStorage.getItem(TOOLBAR_STATE_KEY) === '1'; } catch(e){ /* storage unavailable, default open */ }
+  setToolbarCollapsed(startCollapsed);
+
+  var priceRangeUseful = isFinite(minPrice) && isFinite(maxPrice) && maxPrice > minPrice;
+  if (priceRangeUseful){
+    priceMinRange.min = priceMaxRange.min = minPrice;
+    priceMinRange.max = priceMaxRange.max = maxPrice;
+    priceMinRange.value = minPrice;
+    priceMaxRange.value = maxPrice;
+  } else {
+    priceRangeRow.style.display = 'none';
+  }
+
+  function updateRangeUI(){
+    if (!priceRangeUseful) return;
+    var lo = Math.min(+priceMinRange.value, +priceMaxRange.value);
+    var hi = Math.max(+priceMinRange.value, +priceMaxRange.value);
+    priceMinLabel.textContent = '৳' + lo;
+    priceMaxLabel.textContent = '৳' + hi;
+    var span = maxPrice - minPrice;
+    rangeFill.style.left = ((lo - minPrice) / span * 100) + '%';
+    rangeFill.style.right = (100 - (hi - minPrice) / span * 100) + '%';
+  }
+
+  function applyFilters(){
     var q = searchInput.value.trim().toLowerCase();
-    var anyVisible = false;
+    var lo = priceRangeUseful ? Math.min(+priceMinRange.value, +priceMaxRange.value) : -Infinity;
+    var hi = priceRangeUseful ? Math.max(+priceMinRange.value, +priceMaxRange.value) : Infinity;
+    var availOnly = availOnlyCheckbox.checked;
+    var anyVisible = false, visibleCount = 0;
+
     tiers.forEach(function(tier){
       var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
       var tierHasMatch = false;
       rows.forEach(function(row){
-        var match = !q || row.dataset.search.indexOf(q) !== -1;
+        var price = Number(row.dataset.price);
+        var available = Number(row.dataset.available);
+        var textMatch = !q || row.dataset.search.indexOf(q) !== -1;
+        var priceMatch = price >= lo && price <= hi;
+        var availMatch = !availOnly || available > 0;
+        var match = textMatch && priceMatch && availMatch;
         row.style.display = match ? '' : 'none';
-        if (match) tierHasMatch = true;
+        if (match){ tierHasMatch = true; visibleCount++; }
       });
       tier.style.display = tierHasMatch ? '' : 'none';
       if (tierHasMatch) anyVisible = true;
     });
+
     emptyState.style.display = anyVisible ? 'none' : 'block';
+    filterResultCount.textContent = (visibleCount === totalDishes)
+      ? 'Showing all ' + totalDishes + ' dishes'
+      : 'Showing ' + visibleCount + ' of ' + totalDishes + ' dishes';
   }
-  searchInput.addEventListener('input', applySearch);
-  document.getElementById('clearSearchBtn').addEventListener('click', function(){
+
+  function applySort(){
+    var mode = sortSelect.value;
+    tiers.forEach(function(tier){
+      var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
+      if (mode === 'price-asc'){
+        rows.sort(function(a, b){ return Number(a.dataset.price) - Number(b.dataset.price); });
+      } else if (mode === 'price-desc'){
+        rows.sort(function(a, b){ return Number(b.dataset.price) - Number(a.dataset.price); });
+      } else {
+        rows.sort(function(a, b){ return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex); });
+      }
+      rows.forEach(function(row){ tier.appendChild(row); });
+    });
+  }
+
+  function resetAllFilters(){
     searchInput.value = '';
-    applySearch();
+    if (priceRangeUseful){
+      priceMinRange.value = minPrice;
+      priceMaxRange.value = maxPrice;
+      updateRangeUI();
+    }
+    availOnlyCheckbox.checked = true;
+    sortSelect.value = 'default';
+    applySort();
+    applyFilters();
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  document.getElementById('clearSearchBtn').addEventListener('click', function(){
+    resetAllFilters();
     searchInput.focus();
   });
+
+  if (priceRangeUseful){
+    priceMinRange.addEventListener('input', function(){
+      if (+priceMinRange.value > +priceMaxRange.value) priceMinRange.value = priceMaxRange.value;
+      updateRangeUI();
+      applyFilters();
+    });
+    priceMaxRange.addEventListener('input', function(){
+      if (+priceMaxRange.value < +priceMinRange.value) priceMaxRange.value = priceMinRange.value;
+      updateRangeUI();
+      applyFilters();
+    });
+  }
+  availOnlyCheckbox.addEventListener('change', applyFilters);
+  sortSelect.addEventListener('change', applySort);
+  resetFiltersBtn.addEventListener('click', resetAllFilters);
+
+  updateRangeUI();
+  applyFilters();
 
   /* ---------- Back to top ---------- */
   var topFab = document.getElementById('topFab');
@@ -671,16 +976,112 @@
   var orderForm = document.getElementById('orderForm');
   var currentItem = null, currentChef = null, qty = 1;
 
+  /* ---------- Saved delivery details: save once in this browser, reuse on every order ---------- */
   var STORAGE_KEY = 'foosto-tiffin-customer-details';
+  var reqOrderFields = ['fPhone', 'fName', 'fAddress'];
+
   function loadSavedDetails(){
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch(e){ return null; }
   }
+  function hasCompleteDetails(d){
+    return !!(d && d.name && d.phone && d.address);
+  }
   function saveDetails(details){
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(details)); } catch(e){ /* storage unavailable, skip silently */ }
+    refreshProfileButton();
   }
+  function clearSavedDetails(){
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e){ /* storage unavailable, skip silently */ }
+    refreshProfileButton();
+  }
+
+  var profileBtn = document.getElementById('profileBtn');
+  var profileBtnText = document.getElementById('profileBtnText');
+  var profileSheet = document.getElementById('profileSheet');
+  var profileForm = document.getElementById('profileForm');
+
+  function refreshProfileButton(){
+    var saved = loadSavedDetails();
+    if (hasCompleteDetails(saved)){
+      profileBtn.classList.add('saved');
+      profileBtnText.textContent = 'Saved for ' + saved.name.split(' ')[0] + ' — edit details';
+    } else {
+      profileBtn.classList.remove('saved');
+      profileBtnText.textContent = 'Save my delivery details';
+    }
+  }
+  function openProfileSheet(){
+    var saved = loadSavedDetails() || {};
+    document.getElementById('pPhone').value = saved.phone || '';
+    document.getElementById('pName').value = saved.name || '';
+    document.getElementById('pWhatsapp').value = saved.whatsapp || '';
+    document.getElementById('pEmail').value = saved.email || '';
+    document.getElementById('pAddress').value = saved.address || '';
+    scrim.classList.add('show');
+    profileSheet.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ document.getElementById('pPhone').focus(); }, 260);
+  }
+  function closeProfileSheet(){
+    profileSheet.classList.remove('show');
+    if (!sheet.classList.contains('show')){
+      scrim.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  }
+  profileBtn.addEventListener('click', openProfileSheet);
+  document.getElementById('profileClose').addEventListener('click', closeProfileSheet);
+  profileForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!profileForm.checkValidity()){
+      profileForm.reportValidity();
+      return;
+    }
+    saveDetails({
+      phone: document.getElementById('pPhone').value.trim(),
+      name: document.getElementById('pName').value.trim(),
+      whatsapp: document.getElementById('pWhatsapp').value.trim(),
+      email: document.getElementById('pEmail').value.trim(),
+      address: document.getElementById('pAddress').value.trim()
+    });
+    closeProfileSheet();
+  });
+  document.getElementById('profileClearBtn').addEventListener('click', function(){
+    if (!window.confirm('Clear your saved delivery details from this browser?')) return;
+    clearSavedDetails();
+    ['pPhone','pName','pWhatsapp','pEmail','pAddress'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+  });
+  refreshProfileButton();
+
+  /* ---------- Review card (returning customer) vs. editable fields (first time / editing) ---------- */
+  function setReviewMode(isReview){
+    document.getElementById('detailsFields').style.display = isReview ? 'none' : '';
+    document.getElementById('savedDetailsCard').style.display = isReview ? 'block' : 'none';
+    reqOrderFields.forEach(function(id){
+      var el = document.getElementById(id);
+      if (isReview) el.removeAttribute('required'); else el.setAttribute('required', '');
+    });
+  }
+  function renderSavedCard(d){
+    document.getElementById('savedName').textContent = d.name;
+    document.getElementById('savedPhone').textContent = d.phone;
+    var waRow = document.getElementById('savedWhatsappRow');
+    if (d.whatsapp){ waRow.style.display = 'flex'; document.getElementById('savedWhatsapp').textContent = d.whatsapp; }
+    else { waRow.style.display = 'none'; }
+    var emRow = document.getElementById('savedEmailRow');
+    if (d.email){ emRow.style.display = 'flex'; document.getElementById('savedEmail').textContent = d.email; }
+    else { emRow.style.display = 'none'; }
+    document.getElementById('savedAddress').textContent = d.address;
+  }
+  document.getElementById('editDetailsBtn').addEventListener('click', function(){
+    setReviewMode(false);
+    document.getElementById('fPhone').focus();
+  });
 
   function openSheet(chef, item){
     currentChef = chef; currentItem = item; qty = 1;
@@ -694,28 +1095,39 @@
     updateTotal();
 
     var saved = loadSavedDetails();
-    if (saved){
-      document.getElementById('fPhone').value = saved.phone || '';
-      document.getElementById('fName').value = saved.name || '';
-      document.getElementById('fWhatsapp').value = saved.whatsapp || '';
-      document.getElementById('fEmail').value = saved.email || '';
-      document.getElementById('fAddress').value = saved.address || '';
-    }
+    document.getElementById('fPhone').value = (saved && saved.phone) || '';
+    document.getElementById('fName').value = (saved && saved.name) || '';
+    document.getElementById('fWhatsapp').value = (saved && saved.whatsapp) || '';
+    document.getElementById('fEmail').value = (saved && saved.email) || '';
+    document.getElementById('fAddress').value = (saved && saved.address) || '';
+
+    var reviewMode = hasCompleteDetails(saved);
+    if (reviewMode) renderSavedCard(saved);
+    setReviewMode(reviewMode);
 
     scrim.classList.add('show');
     sheet.classList.add('show');
     document.body.style.overflow = 'hidden';
-    setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260);
+    if (!reviewMode){
+      setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260);
+    }
   }
   function closeSheet(){
-    scrim.classList.remove('show');
     sheet.classList.remove('show');
-    document.body.style.overflow = '';
+    if (!profileSheet.classList.contains('show')){
+      scrim.classList.remove('show');
+      document.body.style.overflow = '';
+    }
   }
   document.getElementById('sheetClose').addEventListener('click', closeSheet);
-  scrim.addEventListener('click', closeSheet);
+  scrim.addEventListener('click', function(){
+    if (sheet.classList.contains('show')) closeSheet();
+    if (profileSheet.classList.contains('show')) closeProfileSheet();
+  });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && sheet.classList.contains('show')) closeSheet();
+    if (e.key !== 'Escape') return;
+    if (sheet.classList.contains('show')) closeSheet();
+    if (profileSheet.classList.contains('show')) closeProfileSheet();
   });
 
   function updateTotal(){
@@ -762,6 +1174,7 @@
       address: document.getElementById('fAddress').value.trim()
     };
     saveDetails(details);
+    renderSavedCard(details);
     var summary = buildSummary(details);
     var copyText = document.getElementById('copyText');
     copyText.value = summary;
