@@ -365,27 +365,6 @@
     cursor:pointer; font-family:inherit;
   }
 
-  /* ---------- Saved delivery details (save once, reuse every order) ---------- */
-  .profile-row{ margin-top:12px; }
-  .profile-btn{
-    display:flex; align-items:center; justify-content:center; gap:7px; width:100%;
-    background:rgba(255,255,255,0.08); color:#FBF3DE; border:1px solid rgba(255,255,255,0.22);
-    border-radius:999px; padding:9px 16px; font-size:0.83rem; font-weight:600; font-family:inherit; cursor:pointer;
-  }
-  .profile-btn svg{ width:14px; height:14px; flex:none; }
-  .profile-btn.saved{ background:rgba(82,104,74,0.4); border-color:rgba(140,168,120,0.55); }
-
-  .details-card{ margin-top:16px; background:var(--bg-soft); border-radius:var(--radius-m); padding:12px 14px; }
-  .details-row{ display:flex; justify-content:space-between; gap:14px; padding:6px 0; font-size:0.86rem; }
-  .details-row + .details-row{ border-top:1px dashed var(--border); }
-  .details-label{ color:var(--ink-soft); flex:none; }
-  .details-value{ color:var(--ink); font-weight:600; text-align:right; word-break:break-word; }
-  .details-edit{
-    display:block; margin-top:10px; background:none; border:none; padding:0; cursor:pointer;
-    color:var(--gold); font-weight:700; font-size:0.85rem; text-decoration:underline; text-underline-offset:3px;
-    font-family:inherit;
-  }
-
   .copy-panel{
     margin-top:14px; display:none;
   }
@@ -439,12 +418,6 @@
       <div class="meta-row">
         <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg> Order by <strong id="cutoffTime">10:20 AM</strong> today</span>
         <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Gulshan · Banani · Tejgaon · Mohakhali · Badda</span>
-      </div>
-      <div class="profile-row">
-        <button id="profileBtn" class="profile-btn" type="button">
-          <svg viewBox="0 0 24 24"><use href="#ic-user"/></svg>
-          <span id="profileBtnText">Save my delivery details</span>
-        </button>
       </div>
       <div class="search-row">
         <svg viewBox="0 0 24 24"><use href="#ic-search"/></svg>
@@ -553,40 +526,29 @@
       </div>
     </div>
 
-    <div id="savedDetailsCard" class="details-card" style="display:none">
-      <div class="details-row"><span class="details-label">Name</span><span class="details-value" id="savedName">–</span></div>
-      <div class="details-row"><span class="details-label">Phone</span><span class="details-value" id="savedPhone">–</span></div>
-      <div class="details-row" id="savedWhatsappRow" style="display:none"><span class="details-label">WhatsApp</span><span class="details-value" id="savedWhatsapp">–</span></div>
-      <div class="details-row" id="savedEmailRow" style="display:none"><span class="details-label">Email</span><span class="details-value" id="savedEmail">–</span></div>
-      <div class="details-row"><span class="details-label">Address</span><span class="details-value" id="savedAddress">–</span></div>
-      <button type="button" class="details-edit" id="editDetailsBtn">Edit details</button>
+    <div class="field-group">
+      <label class="field-label" for="fPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
+      <input class="field-input" id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
     </div>
 
-    <div id="detailsFields">
-      <div class="field-group">
-        <label class="field-label" for="fPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
-        <input class="field-input" id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
-      </div>
+    <div class="field-group">
+      <label class="field-label" for="fName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
+      <input class="field-input" id="fName" name="name" type="text" placeholder="Your full name" required>
+    </div>
 
-      <div class="field-group">
-        <label class="field-label" for="fName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
-        <input class="field-input" id="fName" name="name" type="text" placeholder="Your full name" required>
-      </div>
+    <div class="field-group">
+      <label class="field-label" for="fWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
+      <input class="field-input" id="fWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
+    </div>
 
-      <div class="field-group">
-        <label class="field-label" for="fWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
-        <input class="field-input" id="fWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
-      </div>
+    <div class="field-group">
+      <label class="field-label" for="fEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
+      <input class="field-input" id="fEmail" name="email" type="email" placeholder="you@example.com">
+    </div>
 
-      <div class="field-group">
-        <label class="field-label" for="fEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
-        <input class="field-input" id="fEmail" name="email" type="email" placeholder="you@example.com">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="fAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
-        <textarea class="field-input" id="fAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
-      </div>
+    <div class="field-group">
+      <label class="field-label" for="fAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
+      <textarea class="field-input" id="fAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
     </div>
 
     <div class="total-row">
@@ -607,47 +569,6 @@
     </div>
 
     <a class="cta-secondary" id="messengerLink" href="https://www.facebook.com/foosto.bd/" target="_blank" rel="noopener">Prefer chat? Order via Foosto's Messenger instead</a>
-  </form>
-</div>
-
-<div id="profileSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
-  <div class="sheet-handle"></div>
-  <div class="sheet-head">
-    <h2 id="profileTitle">Your delivery details</h2>
-    <button class="sheet-close" id="profileClose" type="button" aria-label="Close">
-      <svg viewBox="0 0 24 24"><use href="#ic-close"/></svg>
-    </button>
-  </div>
-  <p class="cta-note" style="text-align:left; margin-top:10px;">Saved once in this browser so future orders skip straight to a review screen. Nothing leaves your device until you place an order.</p>
-
-  <form id="profileForm">
-    <div class="field-group">
-      <label class="field-label" for="pPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
-      <input class="field-input" id="pPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="pName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
-      <input class="field-input" id="pName" name="name" type="text" placeholder="Your full name" required>
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="pWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
-      <input class="field-input" id="pWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="pEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
-      <input class="field-input" id="pEmail" name="email" type="email" placeholder="you@example.com">
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="pAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
-      <textarea class="field-input" id="pAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
-    </div>
-
-    <button type="submit" class="cta-primary" id="profileSaveBtn">Save details</button>
-    <div class="confirm-banner" id="profileSavedBanner">
-      <svg viewBox="0 0 24 24"><use href="#ic-hash"/></svg>
-      <span>Saved — this autofills your next order.</span>
-    </div>
-    <button type="button" class="cta-secondary" id="profileClearBtn">Clear saved details</button>
   </form>
 </div>
 
@@ -676,10 +597,8 @@
   function forceCloseAllModals(){
     try {
       var sheetEl = document.getElementById('sheet');
-      var profileEl = document.getElementById('profileSheet');
       var scrimEl = document.getElementById('scrim');
       if (sheetEl) sheetEl.classList.remove('show');
-      if (profileEl) profileEl.classList.remove('show');
       if (scrimEl) scrimEl.classList.remove('show');
     } catch(e){}
     unlockBodyScroll();
@@ -1032,120 +951,6 @@
   var orderForm = document.getElementById('orderForm');
   var currentItem = null, currentChef = null, qty = 1;
 
-  /* ---------- Saved delivery details: save once in this browser, reuse on every order ---------- */
-  var STORAGE_KEY = 'foosto-tiffin-customer-details';
-  var reqOrderFields = ['fPhone', 'fName', 'fAddress'];
-
-  function loadSavedDetails(){
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch(e){ return null; }
-  }
-  function hasCompleteDetails(d){
-    return !!(d && d.name && d.phone && d.address);
-  }
-  function saveDetails(details){
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(details)); } catch(e){ /* storage unavailable, skip silently */ }
-    refreshProfileButton();
-  }
-  function clearSavedDetails(){
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e){ /* storage unavailable, skip silently */ }
-    refreshProfileButton();
-  }
-
-  var profileBtn = document.getElementById('profileBtn');
-  var profileBtnText = document.getElementById('profileBtnText');
-  var profileSheet = document.getElementById('profileSheet');
-  var profileForm = document.getElementById('profileForm');
-
-  function refreshProfileButton(){
-    var saved = loadSavedDetails();
-    if (hasCompleteDetails(saved)){
-      profileBtn.classList.add('saved');
-      profileBtnText.textContent = 'Saved for ' + saved.name.split(' ')[0] + ' — edit details';
-    } else {
-      profileBtn.classList.remove('saved');
-      profileBtnText.textContent = 'Save my delivery details';
-    }
-  }
-  function openProfileSheet(){
-    try {
-      var saved = loadSavedDetails() || {};
-      document.getElementById('pPhone').value = saved.phone || '';
-      document.getElementById('pName').value = saved.name || '';
-      document.getElementById('pWhatsapp').value = saved.whatsapp || '';
-      document.getElementById('pEmail').value = saved.email || '';
-      document.getElementById('pAddress').value = saved.address || '';
-    } catch(e){}
-    try { scrim.classList.add('show'); } catch(e){}
-    try { profileSheet.classList.add('show'); } catch(e){}
-    lockBodyScroll();
-    try { setTimeout(function(){ document.getElementById('pPhone').focus(); }, 260); } catch(e){}
-  }
-  function closeProfileSheet(){
-    try { profileSheet.classList.remove('show'); } catch(e){}
-    try {
-      if (!sheet.classList.contains('show')) scrim.classList.remove('show');
-    } catch(e){}
-    unlockBodyScroll();
-  }
-  profileBtn.addEventListener('click', openProfileSheet);
-  document.getElementById('profileClose').addEventListener('click', closeProfileSheet);
-  profileForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    if (!profileForm.checkValidity()){
-      profileForm.reportValidity();
-      return;
-    }
-    saveDetails({
-      phone: document.getElementById('pPhone').value.trim(),
-      name: document.getElementById('pName').value.trim(),
-      whatsapp: document.getElementById('pWhatsapp').value.trim(),
-      email: document.getElementById('pEmail').value.trim(),
-      address: document.getElementById('pAddress').value.trim()
-    });
-    var banner = document.getElementById('profileSavedBanner');
-    banner.classList.add('show');
-    setTimeout(function(){
-      banner.classList.remove('show');
-      closeProfileSheet();
-    }, 750);
-  });
-  document.getElementById('profileClearBtn').addEventListener('click', function(){
-    if (!window.confirm('Clear your saved delivery details from this browser?')) return;
-    clearSavedDetails();
-    ['pPhone','pName','pWhatsapp','pEmail','pAddress'].forEach(function(id){
-      document.getElementById(id).value = '';
-    });
-  });
-  refreshProfileButton();
-
-  /* ---------- Review card (returning customer) vs. editable fields (first time / editing) ---------- */
-  function setReviewMode(isReview){
-    document.getElementById('detailsFields').style.display = isReview ? 'none' : '';
-    document.getElementById('savedDetailsCard').style.display = isReview ? 'block' : 'none';
-    reqOrderFields.forEach(function(id){
-      var el = document.getElementById(id);
-      if (isReview) el.removeAttribute('required'); else el.setAttribute('required', '');
-    });
-  }
-  function renderSavedCard(d){
-    document.getElementById('savedName').textContent = d.name;
-    document.getElementById('savedPhone').textContent = d.phone;
-    var waRow = document.getElementById('savedWhatsappRow');
-    if (d.whatsapp){ waRow.style.display = 'flex'; document.getElementById('savedWhatsapp').textContent = d.whatsapp; }
-    else { waRow.style.display = 'none'; }
-    var emRow = document.getElementById('savedEmailRow');
-    if (d.email){ emRow.style.display = 'flex'; document.getElementById('savedEmail').textContent = d.email; }
-    else { emRow.style.display = 'none'; }
-    document.getElementById('savedAddress').textContent = d.address;
-  }
-  document.getElementById('editDetailsBtn').addEventListener('click', function(){
-    setReviewMode(false);
-    document.getElementById('fPhone').focus();
-  });
-
   openSheet = function(chef, item){
     currentChef = chef; currentItem = item; qty = 1;
     try {
@@ -1157,34 +962,17 @@
       document.getElementById('copyPanel').classList.remove('show');
       document.getElementById('submitBtn').textContent = 'Copy details & continue to Foosto';
       updateTotal();
-    } catch(e){}
-
-    var reviewMode = false;
-    try {
-      var saved = loadSavedDetails();
-      document.getElementById('fPhone').value = (saved && saved.phone) || '';
-      document.getElementById('fName').value = (saved && saved.name) || '';
-      document.getElementById('fWhatsapp').value = (saved && saved.whatsapp) || '';
-      document.getElementById('fEmail').value = (saved && saved.email) || '';
-      document.getElementById('fAddress').value = (saved && saved.address) || '';
-
-      reviewMode = hasCompleteDetails(saved);
-      if (reviewMode) renderSavedCard(saved);
-      setReviewMode(reviewMode);
+      orderForm.reset();
     } catch(e){}
 
     try { scrim.classList.add('show'); } catch(e){}
     try { sheet.classList.add('show'); } catch(e){}
     lockBodyScroll();
-    if (!reviewMode){
-      try { setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260); } catch(e){}
-    }
+    try { setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260); } catch(e){}
   }
   function closeSheet(){
     try { sheet.classList.remove('show'); } catch(e){}
-    try {
-      if (!profileSheet.classList.contains('show')) scrim.classList.remove('show');
-    } catch(e){}
+    try { scrim.classList.remove('show'); } catch(e){}
     unlockBodyScroll();
   }
   document.getElementById('sheetClose').addEventListener('click', closeSheet);
@@ -1235,8 +1023,6 @@
       email: document.getElementById('fEmail').value.trim(),
       address: document.getElementById('fAddress').value.trim()
     };
-    saveDetails(details);
-    renderSavedCard(details);
     var summary = buildSummary(details);
     var copyText = document.getElementById('copyText');
     copyText.value = summary;
@@ -1258,7 +1044,7 @@
     document.getElementById('submitBtn').textContent = 'Copy again';
     window.open(FOOSTO_ORDER_URL, '_blank', 'noopener');
   });
-  } catch(e){ if (window.console) console.error('[Foosto] order sheet / profile setup failed:', e); }
+  } catch(e){ if (window.console) console.error('[Foosto] order sheet setup failed:', e); }
 
 })();
 </script>
