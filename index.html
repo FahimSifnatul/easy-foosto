@@ -3,164 +3,230 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Foosto lunch</title>
+<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Bengali:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://menu.foosto.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#FBFBF9; --raised:#FFFFFF; --ink:#14171A; --ink-soft:#5B6470;
-  --rule:#E4E6E2; --accent:#B4341F; --accent-ink:#FFFFFF; --low:#8A6D0B;
-  --focus:#1D4ED8;
-  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
-  --bengali:"Noto Serif Bengali","Nirmala UI","Shonar Bangla",serif;
-  --gap:clamp(16px,4vw,32px);
+  --bg:#F3E9D2; --bg-soft:#EADFC4; --surface:#FFFCF5;
+  --ink:#2B1D12; --ink-soft:#7A6650; --ink-faint:#A8977E;
+  --brand-dark:#3B2B20;
+  --gold:#B87F17; --gold-bg:#F0DDA9;
+  --green:#52684A; --green-bg:#DCE4CF;
+  --brick:#A2402F; --brick-bg:#F1D6CC;
+  --border:#DDCBA6; --focus:#7A4E12;
+  --shadow:0 1px 2px rgba(43,29,18,.10);
+  --radius-m:12px; --maxw:940px; --barH:210px;
+  --display:'Baloo Da 2','Hind Siliguri',sans-serif;
 }
 @media (prefers-color-scheme:dark){
-  :root{--paper:#131416;--raised:#1B1D20;--ink:#ECEDEE;--ink-soft:#9BA3AC;
-        --rule:#2C2F33;--accent:#E4674E;--accent-ink:#17181A;--low:#D2A93A;--focus:#7CA0FF;}
+  :root{
+    --bg:#1C140D; --bg-soft:#241A11; --surface:#2A1F15;
+    --ink:#F3E9D2; --ink-soft:#C9B896; --ink-faint:#8B7A62;
+    --brand-dark:#120C08;
+    --gold:#E3AF3F; --gold-bg:#3E2F14;
+    --green:#90AB80; --green-bg:#26301F;
+    --brick:#E0806A; --brick-bg:#3B1F19;
+    --border:#3A2C1C; --focus:#E3AF3F;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
-     font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums}
-:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
-button{font:inherit;color:inherit;cursor:pointer}
-.wrap{max-width:940px;margin:0 auto;padding:0 var(--gap)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Hind Siliguri','Inter',system-ui,sans-serif;font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:var(--display);margin:0}
+button{font-family:inherit;color:inherit;cursor:pointer}
+img{max-width:100%;display:block}
+::selection{background:var(--gold-bg);color:var(--ink)}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:1px;border-radius:4px}
+.app{max-width:var(--maxw);margin:0 auto;padding:0 18px 90px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ---- Hero. The cutoff clock is the one loud element on the page. -------- */
-.hero{padding:40px 0 28px}
-.hero h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.01em;color:var(--ink-soft)}
-.clock{margin:10px 0 0;font-size:clamp(30px,7vw,46px);line-height:1.05;font-weight:600;
-       letter-spacing:-.02em;font-feature-settings:"tnum"}
-.clock.closed{color:var(--ink-soft)}
-.clock em{font-style:normal;color:var(--accent)}
-.hero p{margin:8px 0 0;color:var(--ink-soft);font-size:14px;max-width:62ch}
+/* ---------- Top bar ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:var(--brand-dark);color:#F3E9D2;
+  padding-top:max(14px,env(safe-area-inset-top));box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.topbar-inner{max-width:var(--maxw);margin:0 auto;padding:0 18px 12px}
+.brand-row{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;flex:none;color:#E3AF3F}
+.brand-name{font-family:var(--display);font-size:1.35rem;font-weight:700;letter-spacing:.2px;line-height:1.2}
+.brand-tagline{font-size:.82rem;color:#D8C6A3;margin-top:1px}
 
-/* ---- Sticky controls --------------------------------------------------- */
-.bar{position:sticky;top:0;z-index:30;background:var(--paper);
-     border-bottom:1px solid var(--rule)}
-@supports (backdrop-filter:blur(6px)){
-  .bar{background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px)}
-}
-.bar-inner{padding:12px 0}
-.row1{display:flex;gap:8px;align-items:center}
-.search{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:var(--raised);
-        border:1px solid var(--rule);border-radius:8px;padding:0 10px;height:42px}
-.search input{flex:1;min-width:0;border:0;background:none;height:100%;font:inherit;color:inherit;outline:none}
-.search svg{flex:none;color:var(--ink-soft)}
-.toggle{flex:none;height:42px;padding:0 14px;background:var(--raised);border:1px solid var(--rule);
-        border-radius:8px;font-size:14px;font-weight:500}
-.toggle[aria-expanded=true]{border-color:var(--ink);}
-@media(min-width:721px){.toggle{display:none}}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:12px;
+  font-size:.82rem;color:#E7D9BA}
+.meta-item{display:flex;align-items:center;gap:6px}
+.meta-item svg{width:15px;height:15px;flex:none;color:#E3AF3F}
+.meta-item strong{color:#FBF3DE;font-weight:600}
+.meta-item.urgent strong{color:#E3AF3F}
+.meta-item.shut svg{color:#C08D6F}
 
-.panel{display:grid;gap:14px;padding-top:12px}
-/* see .panel[hidden] below */
+.search-row{margin-top:12px;display:flex;gap:8px}
+.search-wrap{position:relative;flex:1;min-width:0}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:17px;height:17px;color:#B7A481;pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 36px;border-radius:var(--radius-m);
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);
+  color:#FBF3DE;font:inherit;font-size:.95rem}
+.search-input::placeholder{color:#B7A481}
+.search-input:focus-visible{outline:2.5px solid #E3AF3F;outline-offset:1px}
+.tool-btn{flex:none;padding:0 15px;border-radius:var(--radius-m);
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);
+  color:#F3E9D2;font-size:.87rem;font-weight:600}
+.tool-btn:hover{background:rgba(255,255,255,.15)}
+.tool-btn[aria-expanded=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
+
+.panel{margin-top:10px;padding:13px 14px;border-radius:var(--radius-m);
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  display:grid;gap:14px}
 .panel[hidden]{display:none}
-@media(min-width:721px){
-  .panel,.panel[hidden]{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end}
-}
-.field{min-width:0}
-.field > span{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
-select{width:100%;height:38px;background:var(--raised);color:inherit;border:1px solid var(--rule);
-       border-radius:8px;padding:0 8px;font:inherit;font-size:14px}
-
-/* dual-handle price slider */
+@media(min-width:700px){.panel,.panel[hidden]{display:grid;grid-template-columns:1fr 1fr auto;align-items:end}}
+.field > span{display:block;font-size:.76rem;color:#C6B392;margin-bottom:5px}
+.field select{width:100%;height:38px;border-radius:9px;font:inherit;font-size:.87rem;
+  background:#2A1F15;color:#F3E9D2;border:1px solid rgba(255,255,255,.16);padding:0 8px}
 .slider{position:relative;height:38px;display:flex;align-items:center}
-.slider .track{position:absolute;left:0;right:0;height:3px;background:var(--rule);border-radius:2px}
-.slider .fill{position:absolute;height:3px;background:var(--accent);border-radius:2px}
+.slider .track{position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.18);border-radius:2px}
+.slider .fill{position:absolute;height:3px;background:#E3AF3F;border-radius:2px}
 .slider input{position:absolute;left:0;width:100%;margin:0;background:none;pointer-events:none;
-              -webkit-appearance:none;appearance:none;height:38px}
-.slider input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:20px;height:20px;
-  border-radius:50%;background:var(--raised);border:2px solid var(--accent);cursor:grab}
-.slider input::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;
-  background:var(--raised);border:2px solid var(--accent);cursor:grab}
+  -webkit-appearance:none;appearance:none;height:38px}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:19px;height:19px;
+  border-radius:50%;background:#F3E9D2;border:2px solid #E3AF3F;cursor:grab}
+.slider input::-moz-range-thumb{pointer-events:auto;width:17px;height:17px;border-radius:50%;
+  background:#F3E9D2;border:2px solid #E3AF3F;cursor:grab}
 .slider input::-moz-range-track{background:none}
+.group-toggle{height:38px;padding:0 14px;border-radius:999px;font-size:.82rem;font-weight:600;
+  background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.14);white-space:nowrap}
+.group-toggle[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
-/* chef multi-select */
-.multi{position:relative}
-.multi > button{width:100%;height:38px;text-align:left;background:var(--raised);
-  border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-size:14px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.menu{position:absolute;z-index:40;top:calc(100% + 4px);left:0;right:0;max-height:270px;overflow:auto;
-  background:var(--raised);border:1px solid var(--rule);border-radius:8px;padding:6px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12)}
-.menu label{display:flex;gap:9px;align-items:center;padding:7px 8px;border-radius:6px;font-size:14px;cursor:pointer}
-.menu label:hover{background:var(--paper)}
-.menu input{accent-color:var(--accent);flex:none}
-.menu .cnt{margin-left:auto;color:var(--ink-soft);font-size:12.5px}
+/* Chef rail doubles as the chef multi-select: tap to filter, tap again to drop. */
+.chip-rail{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:2px;scrollbar-width:none}
+.chip-rail::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 14px;border-radius:999px;font-size:.85rem;font-weight:600;
+  background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.12);
+  white-space:nowrap;transition:background .15s ease,color .15s ease}
+.chip:hover{background:rgba(255,255,255,.14)}
+.chip[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
+.chip .n{opacity:.65;font-weight:500;margin-left:5px}
 
-.status{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;padding:10px 0 0;
-        font-size:13.5px;color:var(--ink-soft)}
-.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-size:13.5px;
-         font-weight:500;text-decoration:underline;text-underline-offset:3px}
-.linkbtn[hidden]{display:none}
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:11px;
+  font-size:.82rem;color:#D8C6A3}
+.fchip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 5px 0 10px;
+  border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
+  font-size:.78rem;max-width:210px}
+.fchip > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip button{border:0;background:none;padding:0 4px;line-height:1;color:#C6B392;font-size:15px}
+.fchip button:hover{color:#E3AF3F}
+.clear-all{background:none;border:0;padding:0;color:#E3AF3F;font-size:.82rem;font-weight:600;
+  text-decoration:underline;text-underline-offset:3px}
+.clear-all[hidden]{display:none}
 
-/* ---- Menu ledger ------------------------------------------------------- */
-main{padding:8px 0 72px}
-.item{display:grid;grid-template-columns:1fr auto auto;gap:6px 18px;align-items:start;
-  padding:18px 0;border-bottom:1px solid var(--rule);
-  content-visibility:auto;contain-intrinsic-size:0 104px}
-.name{grid-column:1;font-family:var(--bengali);font-size:16.5px;line-height:1.55;font-weight:500;margin:0}
-.meta{grid-column:1;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--ink-soft);margin-top:3px}
-.meta b{font-weight:500;color:var(--ink)}
-.price{grid-column:2;grid-row:1/span 2;font-size:17px;font-weight:600;white-space:nowrap;padding-top:1px}
-.order{grid-column:3;grid-row:1/span 2;height:38px;padding:0 18px;border:0;border-radius:8px;
-  background:var(--accent);color:var(--accent-ink);font-weight:500;font-size:14px;white-space:nowrap}
-.order:hover{filter:brightness(1.08)}
-.order:disabled{background:none;color:var(--ink-soft);border:1px solid var(--rule);cursor:not-allowed;filter:none}
-.item.out .name,.item.out .price{opacity:.5}
-.tag{font-weight:500}
-.tag.sold{color:var(--accent)}
-.tag.low{color:var(--low)}
+/* ---------- Hero ---------- */
+.hero{padding:30px 0 18px}
+.hero h1{font-size:clamp(1.7rem,5vw,2.4rem);font-weight:700;color:var(--ink);max-width:19ch}
+.hero p{margin:10px 0 0;color:var(--ink-soft);font-size:1rem;max-width:56ch}
+.hero-stats{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
+.hero-stat b{display:block;font-family:var(--display);font-size:1.4rem;color:var(--gold);line-height:1.3}
+.hero-stat span{font-size:.8rem;color:var(--ink-soft)}
 
-@media(max-width:560px){
-  .item{grid-template-columns:1fr auto}
-  .price{grid-column:2;grid-row:1}
-  .order{grid-column:1/-1;grid-row:3;justify-self:stretch;margin-top:10px}
+/* ---------- Chef tiers ---------- */
+.tier{margin-top:8px;scroll-margin-top:calc(var(--barH) + 14px);
+  content-visibility:auto;contain-intrinsic-size:0 460px}
+.ghead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:14px 0 10px 14px;margin-top:22px;border-left:4px solid var(--gold)}
+.ghead h2{font-size:1.22rem;font-weight:600;color:var(--ink)}
+.gmeta{font-size:.8rem;color:var(--ink-faint);white-space:nowrap}
+
+/* ---------- Dishes ---------- */
+.item{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;
+  padding:14px 4px;border-bottom:1px solid var(--border)}
+.tier .item:last-child{border-bottom:none}
+.thumb{flex:none;width:64px;height:64px;border-radius:10px;overflow:hidden;
+  background:var(--bg-soft);position:relative;border:1px solid var(--border)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb.none::after{content:"";position:absolute;inset:50% auto auto 50%;width:20px;height:20px;
+  transform:translate(-50%,-50%);border:2px solid var(--ink-faint);border-radius:50%;opacity:.4}
+.dish-info{min-width:0;flex:1}
+.name{font-size:1.01rem;font-weight:500;color:var(--ink);margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:7px;font-size:.82rem;
+  color:var(--ink-soft);align-items:center}
+.price{font-weight:600;color:var(--ink)}
+.chef-tag{font-weight:600;color:var(--ink-soft)}
+.code-tag{font-variant-numeric:tabular-nums;background:var(--bg-soft);border:1px solid var(--border);
+  padding:1px 7px;border-radius:5px;color:var(--ink-soft)}
+.tag{padding:1px 8px;border-radius:999px;font-weight:600}
+.tag.ok{background:var(--green-bg);color:var(--green)}
+.tag.low{background:var(--brick-bg);color:var(--brick)}
+.tag.sold{background:var(--brick-bg);color:var(--brick)}
+.order{flex:none;align-self:center;background:var(--gold);color:#2A1B06;border:none;
+  border-radius:999px;padding:9px 18px;font-size:.9rem;font-weight:700;
+  transition:transform .12s ease,filter .12s ease}
+.order:hover{filter:brightness(1.06)}
+.order:active{transform:scale(.97)}
+.order:disabled{background:none;color:var(--ink-faint);border:1px solid var(--border);
+  cursor:not-allowed;filter:none;transform:none}
+.item.out .name,.item.out .price,.item.out .thumb{opacity:.5}
+@media(max-width:520px){
+  .item{flex-wrap:wrap}
+  .order{width:100%;align-self:stretch;margin-top:4px}
 }
-.skel{padding:18px 0;border-bottom:1px solid var(--rule)}
-.skel div{height:12px;border-radius:4px;background:var(--rule);opacity:.7}
-.skel div:first-child{width:min(70%,420px)}
-.skel div:last-child{width:120px;margin-top:10px;height:10px}
+
+.skel{display:flex;gap:14px;padding:14px 4px;border-bottom:1px solid var(--border)}
+.skel i{display:block;width:64px;height:64px;border-radius:10px;background:var(--bg-soft);flex:none}
+.skel u{display:block;height:13px;border-radius:5px;background:var(--bg-soft);
+  width:min(70%,420px);text-decoration:none}
+.skel u + u{width:140px;margin-top:11px;height:11px}
 @media(prefers-reduced-motion:no-preference){
-  .skel div{animation:pulse 1.4s ease-in-out infinite}
-  @keyframes pulse{50%{opacity:.3}}
+  .skel i,.skel u{animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.45}}
 }
-.notice{padding:52px 4px;text-align:center;color:var(--ink-soft);font-size:14.5px}
-.notice strong{display:block;color:var(--ink);font-size:17px;font-weight:600;margin-bottom:6px}
-.notice button{margin-top:16px;height:40px;padding:0 20px;border-radius:8px;border:0;
-  background:var(--accent);color:var(--accent-ink);font-weight:500}
+.empty-state{margin-top:40px;padding:34px 18px;text-align:center;color:var(--ink-soft);
+  border:1px dashed var(--border);border-radius:var(--radius-m)}
+.empty-state h3{font-size:1.1rem;color:var(--ink);margin-bottom:6px}
+.empty-state button{margin-top:14px;background:none;border:1px solid var(--border);color:var(--ink);
+  padding:8px 16px;border-radius:999px;font-size:.85rem}
+footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--ink-faint);line-height:1.7}
 
-/* ---- Modal ------------------------------------------------------------- */
-.scrim{position:fixed;inset:0;z-index:60;background:rgba(10,11,12,.5);display:flex;
-  align-items:flex-end;justify-content:center;padding:0}
+.top-fab{position:fixed;right:18px;bottom:18px;z-index:20;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--border);background:var(--surface);color:var(--ink);box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;
+  transition:opacity .2s ease}
+.top-fab.show{opacity:1;pointer-events:auto}
+.top-fab svg{width:18px;height:18px}
+
+/* ---------- Order sheet ---------- */
+.scrim{position:fixed;inset:0;background:rgba(20,13,7,.5);z-index:40;
+  display:flex;align-items:flex-end;justify-content:center}
 @media(min-width:600px){.scrim{align-items:center;padding:24px}}
-.modal{background:var(--paper);width:100%;max-width:460px;max-height:92vh;overflow:auto;
-  border-radius:14px 14px 0 0;padding:22px}
-@media(min-width:600px){.modal{border-radius:14px}}
-@media(prefers-reduced-motion:no-preference){.modal{animation:rise .18s ease-out}
-  @keyframes rise{from{transform:translateY(14px);opacity:0}}}
-.modal h2{margin:0 0 2px;font-size:19px;font-weight:600}
-.modal .dish{font-family:var(--bengali);font-size:14.5px;color:var(--ink-soft);
-  line-height:1.5;margin:0 0 18px}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:470px;max-height:92vh;
+  overflow:auto;border-radius:20px 20px 0 0;padding:22px}
+@media(min-width:600px){.sheet{border-radius:20px}}
+@media(prefers-reduced-motion:no-preference){.sheet{animation:rise .2s ease-out}
+  @keyframes rise{from{transform:translateY(16px);opacity:0}}}
+.shead{display:flex;gap:13px;margin-bottom:18px}
+.shead h2{font-size:1.1rem;font-weight:700;margin-bottom:3px}
+.shead .dish{font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin:0}
 .f{margin-bottom:13px}
-.f label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
-.f input,.f textarea,.f select{width:100%;background:var(--raised);color:inherit;border:1px solid var(--rule);
-  border-radius:8px;padding:9px 10px;font:inherit;font-size:15px}
+.f label{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ink-soft);margin-bottom:5px}
+.f label svg{width:14px;height:14px;color:var(--gold)}
+.f input,.f textarea,.f select{width:100%;background:var(--bg);color:inherit;
+  border:1px solid var(--border);border-radius:10px;padding:9px 11px;font:inherit;font-size:.95rem}
 .f textarea{resize:vertical;min-height:64px}
-.f input:read-only{background:var(--rule);color:var(--ink-soft)}
+.f input:read-only{background:var(--bg-soft);color:var(--ink-soft)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.submit{width:100%;height:46px;border:0;border-radius:9px;background:var(--accent);
-  color:var(--accent-ink);font-weight:600;font-size:15px;margin-top:6px}
+.submit{width:100%;height:48px;border:0;border-radius:999px;background:var(--gold);
+  color:#2A1B06;font-weight:700;font-size:.98rem;margin-top:6px}
 .submit:disabled{opacity:.6;cursor:wait}
-.modal-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}
-.result{margin-top:14px;padding:12px 13px;border-radius:9px;font-size:14px;line-height:1.5;border:1px solid}
-.result.ok{border-color:var(--rule);background:var(--raised)}
-.result.bad{border-color:var(--accent);color:var(--accent)}
-.result.info{border-color:var(--rule);background:var(--raised);color:var(--ink-soft)}
-.result a{color:var(--accent)}
+.sheet-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}
+.linkbtn{background:none;border:0;padding:0;color:var(--gold);font-size:.85rem;font-weight:600;
+  text-decoration:underline;text-underline-offset:3px}
+.linkbtn[hidden]{display:none}
+.result{margin-top:14px;padding:12px 13px;border-radius:11px;font-size:.88rem;line-height:1.55;border:1px solid}
+.result.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.result.bad{border-color:var(--brick);background:var(--brick-bg);color:var(--brick)}
+.result.info{border-color:var(--border);background:var(--bg-soft);color:var(--ink-soft)}
+.result a{color:inherit;font-weight:600}
 </style>
 </head>
 <body>
@@ -169,75 +235,136 @@ main{padding:8px 0 72px}
      ORDER SUBMISSION CONFIG  —  READ THIS BEFORE DEPLOYING
      ========================================================================
      admin.foosto.com has NO HTTPS (port 443 refuses connections). GitHub Pages
-     serves over HTTPS. A browser will therefore block any POST from this page
-     straight to http://admin.foosto.com as mixed content. There is no
-     client-side workaround; `mode:'no-cors'` does not help, because mixed
-     content is blocked before CORS is even evaluated.
+     serves over HTTPS. Browsers block HTTPS -> HTTP requests as mixed content
+     before CORS is even evaluated, so this page cannot POST to Foosto directly.
 
-     Set ORDER.endpoint to an HTTPS proxy that forwards to Foosto and in-app
-     ordering starts working. Leave it empty and the modal degrades honestly:
-     it collects the details, saves them, and hands off to Foosto's own form.
+     Set ORDER.endpoint to an HTTPS proxy (see worker.js) and in-app ordering
+     starts working. Leave it empty and the sheet degrades honestly: it collects
+     the details, saves them, and hands off to Foosto's own form.
 
-     ORDER.fields maps this app's inputs to Foosto's form input names. The
-     names below are PLACEHOLDERS — I could not read the form's markup. Open
-     http://admin.foosto.com/order/create/, submit it once with DevTools'
-     Network tab open, and copy the real payload keys in here.
+     ORDER.fields maps this app's inputs to Foosto's form input names. The names
+     below are PLACEHOLDERS. Submit http://admin.foosto.com/order/create/ once
+     with DevTools' Network tab open and copy the real payload keys in.
      ==================================================================== -->
 
-<header class="hero wrap">
-  <h1>Foosto home-kitchen lunch, Dhaka</h1>
-  <p class="clock" id="clock">&nbsp;</p>
-  <p id="heroNote">Gulshan, Banani, Tejgaon, Mohakhali and Badda.</p>
-</header>
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-tiffin" viewBox="0 0 48 48">
+    <path d="M12 8c0-1.7 5.4-3 12-3s12 1.3 12 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="9" y="8" width="30" height="7" rx="2" fill="currentColor" opacity=".9"/>
+    <rect x="10.5" y="16.5" width="27" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <rect x="10.5" y="27" width="27" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <rect x="9" y="37.5" width="30" height="4.5" rx="2" fill="currentColor" opacity=".9"/>
+  </symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3.2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.6" r="2.4" fill="currentColor"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-4.6-4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-up" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1-4 4.2-6 7-6s6 2 7 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24"><path d="M7 4h2.2l1 4-2 1.6a11 11 0 0 0 5.2 5.2l1.6-2 4 1v2.2c0 1-.9 1.8-1.9 1.6C10.6 16.9 7.1 13.4 6.4 7.9 6.2 6.9 6 6 7 4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-whatsapp" viewBox="0 0 24 24"><path d="M7 17.4 4.6 20l.9-3.2A7.9 7.9 0 1 1 12 20a8 8 0 0 1-5-1.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 7 12 13l7.5-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-pin-s" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9.6" r="2.2" fill="currentColor"/></symbol>
+  <symbol id="ic-hash" viewBox="0 0 24 24"><path d="M9 4 7 20M17 4l-2 16M4.5 9h15M3.5 15h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="ic-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+</svg>
 
-<div class="bar">
-  <div class="wrap bar-inner">
-    <div class="row1">
-      <div class="search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Search dishes or chefs" autocomplete="off" aria-label="Search dishes or chefs">
+<div class="topbar" role="banner">
+  <div class="topbar-inner">
+    <div class="brand-row">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#ic-tiffin"/></svg>
+      <div>
+        <div class="brand-name">Foosto Tiffin</div>
+        <div class="brand-tagline">ঘরের রান্না, আপনার ডেস্কে</div>
       </div>
-      <button class="toggle" id="toggleFilters" aria-expanded="false" aria-controls="panel">Filters</button>
+    </div>
+
+    <div class="meta-row">
+      <span class="meta-item" id="cutoffItem">
+        <svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg><span id="cutoffText">&nbsp;</span>
+      </span>
+      <span class="meta-item">
+        <svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg>
+        Gulshan · Banani · Tejgaon · Mohakhali · Badda
+      </span>
+      <span class="meta-item" id="freshItem" hidden>
+        <svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>
+        Menu updated <strong id="freshness"></strong>
+      </span>
+    </div>
+
+    <div class="search-row">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-search"/></svg>
+        <input id="q" class="search-input" type="search" autocomplete="off"
+               placeholder="Search dishes, chefs or menu codes"
+               aria-label="Search dishes, chefs or menu codes">
+      </div>
+      <button class="tool-btn" id="toggleFilters" aria-expanded="false" aria-controls="panel">Sort &amp; price</button>
     </div>
 
     <div class="panel" id="panel" hidden>
       <div class="field">
         <span id="lblSort">Sort</span>
         <select id="sort" aria-labelledby="lblSort">
-          <option value="price-asc">Price, low to high</option>
-          <option value="price-desc">Price, high to low</option>
-          <option value="avail-desc">Most available</option>
+          <option value="price-asc">Cheapest first</option>
+          <option value="price-desc">Most expensive first</option>
+          <option value="avail-desc">Most portions left</option>
+          <option value="chef-asc">Chef name, A to Z</option>
         </select>
       </div>
       <div class="field">
-        <span>Price <span id="priceLabel"></span></span>
-        <div class="slider" id="slider">
+        <span>Price range <span id="priceLabel"></span></span>
+        <div class="slider">
           <div class="track"></div><div class="fill" id="fill"></div>
           <input type="range" id="pmin" aria-label="Minimum price">
           <input type="range" id="pmax" aria-label="Maximum price">
         </div>
       </div>
-      <div class="field multi" id="multi">
-        <span id="lblChef">Chef</span>
-        <button type="button" id="chefBtn" aria-expanded="false" aria-labelledby="lblChef chefBtn">All chefs</button>
-        <div class="menu" id="chefMenu" hidden></div>
+      <div class="field">
+        <span>View</span>
+        <button class="group-toggle" id="groupBtn" aria-pressed="true">Grouped by chef</button>
       </div>
     </div>
 
-    <div class="status">
+    <div class="chip-rail" id="chipRail" aria-label="Filter by chef"></div>
+
+    <div class="fbar">
       <span id="count" aria-live="polite" role="status"></span>
-      <button class="linkbtn" id="clear" hidden>Clear all filters</button>
-      <span style="margin-left:auto" id="freshness"></span>
+      <span id="fchips" style="display:contents"></span>
+      <button class="clear-all" id="clear" hidden>Clear all</button>
     </div>
   </div>
 </div>
 
-<main class="wrap" id="main"></main>
+<div class="app">
+  <section class="hero">
+    <h1 id="heroTitle">Today's home-cooked lunch</h1>
+    <p id="heroSub">Cooked this morning by home chefs across Dhaka, delivered to your desk.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><b id="statChefs">–</b><span>home chefs today</span></div>
+      <div class="hero-stat"><b id="statDishes">–</b><span>dishes on the menu</span></div>
+      <div class="hero-stat"><b id="statPrice">–</b><span>price range</span></div>
+    </div>
+  </section>
+
+  <main id="main"></main>
+
+  <footer class="note">
+    Menu data is mirrored from menu.foosto.com and refreshes automatically through
+    the morning. Availability can change between refreshes, so a dish may sell out
+    before your order reaches the kitchen.
+  </footer>
+</div>
+
+<button class="top-fab" id="topFab" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-up"/></svg>
+</button>
 
 <script>
 /* ===================================================================== */
 const ORDER = {
-  endpoint: '',                                    // e.g. 'https://foosto-order.you.workers.dev/order'
+  endpoint: '',                                    // e.g. 'https://foosto-order.you.workers.dev'
   encoding: 'form',                                // 'form' (urlencoded) or 'json'
   fallbackUrl: 'http://admin.foosto.com/order/create/',
   fields: {                                        // our key  ->  Foosto's input name
@@ -250,7 +377,7 @@ const ORDER = {
     address:  'address',
   },
 };
-const MENU_FILE   = 'menu.js';
+const MENU_FILE    = 'menu.js';
 const LOAD_TIMEOUT = 15000;
 const CUTOFF       = { hour: 10, minute: 20 };   // Dhaka local; UTC+6, no DST
 const STORE_KEY    = 'foosto.customer.v1';
@@ -262,17 +389,20 @@ const LOW_STOCK    = 5;
 const $ = (id) => document.getElementById(id);
 const main = $('main');
 const taka = (n) => '\u09F3' + (Number.isInteger(n) ? n : n.toFixed(2));
+const range = (a, b) => a === b ? taka(a) : taka(a) + '\u2013' + (Number.isInteger(b) ? b : b.toFixed(2));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const icon = (id) => '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#' + id + '"/></svg>';
 
-/* --- localStorage, wrapped so private browsing can't break the app ------ */
 const store = {
   read() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; } },
   write(v) { try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); return true; } catch { return false; } },
   clear() { try { localStorage.removeItem(STORE_KEY); } catch {} },
 };
 
-/* --- Cutoff clock ------------------------------------------------------- */
+/* --- Cutoff status ------------------------------------------------------
+   Two states, and the closed one has to be useful rather than just a dead
+   end: it says what happens next instead of only announcing the door shut. */
 function tickClock() {
   const DHAKA = 6 * 3600e3;                       // UTC+6, no daylight saving
   const now = Date.now();
@@ -280,23 +410,26 @@ function tickClock() {
   const cutoff = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
                           CUTOFF.hour, CUTOFF.minute) - DHAKA;
   const left = cutoff - now;
-  const el = $('clock');
+  const item = $('cutoffItem'), text = $('cutoffText');
+
   if (left <= 0) {
-    el.className = 'clock closed';
-    el.textContent = 'Today\u2019s ordering has closed';
-    $('heroNote').textContent = 'The menu below is today\u2019s. Ordering reopens tomorrow morning.';
+    item.className = 'meta-item shut';
+    text.innerHTML = 'Kitchens closed for today \u00b7 <strong>tomorrow\u2019s menu arrives in the morning</strong>';
+    $('heroTitle').textContent = 'Today\u2019s menu';
+    $('heroSub').textContent = 'Ordering closed at ' + CUTOFF.hour + ':' + String(CUTOFF.minute).padStart(2, '0')
+      + ' AM. Browse what was cooked today, then come back before the cutoff tomorrow.';
     return;
   }
   const h = Math.floor(left / 3600e3), m = Math.floor(left / 60e3) % 60, s = Math.floor(left / 1e3) % 60;
-  el.className = 'clock';
-  el.innerHTML = (h ? h + 'h ' : '') + m + 'm ' + String(s).padStart(2, '0') + 's <em>left to order</em>';
+  const clock = (h ? h + 'h ' : '') + m + 'm ' + String(s).padStart(2, '0') + 's';
+  item.className = 'meta-item' + (left < 3600e3 ? ' urgent' : '');
+  text.innerHTML = 'Order within <strong>' + clock + '</strong>';
 }
 
 /* --- Loading menu.js ---------------------------------------------------- */
-/* menu.js is same-origin and assigns window.FOOSTO_MENU. A <script> tag is
-   used rather than fetch() so the page also works from file:// while you're
-   editing it locally. The timestamp defeats any CDN or browser caching, so
-   every page load gets whatever the Action last committed. */
+/* Same-origin, assigns window.FOOSTO_MENU. A <script> tag rather than fetch()
+   so the page also works from file:// while editing locally. The timestamp
+   defeats caching, so every load gets whatever the Action last committed. */
 function loadMenu() {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -312,58 +445,139 @@ function loadMenu() {
 }
 
 /* --- State -------------------------------------------------------------- */
-const state = { items: [], chefs: [], bounds: [0, 0], q: '', sort: 'price-asc',
-                min: 0, max: 0, picked: new Set() };
+const state = { items: [], bounds: [0, 0], q: '', sort: 'price-asc',
+                min: 0, max: 0, picked: new Set(), grouped: true };
 
-function pipeline() {
+/* Sorting answers two questions once dishes are grouped: how to order dishes
+   inside a chef, and how to order the chefs. "Cheapest first" puts the chef
+   who owns the cheapest dish on top, and that chef's cheapest dish first. */
+const ITEM_SORT = {
+  'price-asc':  (a, b) => a.price - b.price,
+  'price-desc': (a, b) => b.price - a.price,
+  'avail-desc': (a, b) => b.available - a.available,
+  'chef-asc':   (a, b) => a.price - b.price,
+};
+const GROUP_SORT = {
+  'price-asc':  (A, B) => A.min - B.min,
+  'price-desc': (A, B) => B.max - A.max,
+  'avail-desc': (A, B) => B.topAvail - A.topAvail,
+  'chef-asc':   (A, B) => A.chef.localeCompare(B.chef),
+};
+
+function filtered() {
   const q = state.q.trim().toLowerCase();
-  let out = state.items.filter((it) =>
+  return state.items.filter((it) =>
     it.price >= state.min && it.price <= state.max &&
     (state.picked.size === 0 || state.picked.has(it.chef)) &&
-    (q === '' || it.name.toLowerCase().includes(q) || it.chef.toLowerCase().includes(q)));
+    (q === '' || it.name.toLowerCase().includes(q)
+              || it.chef.toLowerCase().includes(q)
+              || it.code.toLowerCase().includes(q)));
+}
 
-  const by = { 'price-asc': (a, b) => a.price - b.price,
-               'price-desc': (a, b) => b.price - a.price,
-               'avail-desc': (a, b) => b.available - a.available };
-  return out.sort((a, b) => by[state.sort](a, b) || a.name.localeCompare(b.name, 'bn'));
+function grouped(rows) {
+  const map = new Map();
+  for (const it of rows) {
+    if (!map.has(it.chef)) map.set(it.chef, []);
+    map.get(it.chef).push(it);
+  }
+  const groups = [...map].map(([chef, items]) => ({
+    chef, items: items.sort(ITEM_SORT[state.sort]),
+    min: Math.min(...items.map((i) => i.price)),
+    max: Math.max(...items.map((i) => i.price)),
+    topAvail: Math.max(...items.map((i) => i.available)),
+  }));
+  return groups.sort((A, B) => GROUP_SORT[state.sort](A, B) || A.chef.localeCompare(B.chef));
+}
+
+/* --- Rendering ---------------------------------------------------------- */
+function dishHTML(it) {
+  const out = it.available <= 0, low = !out && it.available <= LOW_STOCK;
+  const tag = out ? '<span class="tag sold">Sold out</span>'
+    : low ? '<span class="tag low">Only ' + it.available + ' left</span>'
+          : '<span class="tag ok">' + it.available + ' left</span>';
+  // Photos are hotlinked from Foosto over https. loading="lazy" means a long
+  // list only pulls the ones actually on screen.
+  const photo = it.images && it.images.length
+    ? '<div class="thumb"><img src="' + esc(it.images[0]) + '" alt="" loading="lazy" '
+      + 'decoding="async" onerror="this.parentNode.classList.add(\'none\');this.remove()"></div>'
+    : '<div class="thumb none"></div>';
+  return '<article class="item' + (out ? ' out' : '') + '">'
+    + photo
+    + '<div class="dish-info">'
+    +   '<h3 class="name" lang="bn">' + esc(it.name) + '</h3>'
+    +   '<div class="meta">'
+    +     (state.grouped ? '' : '<span class="chef-tag">' + esc(it.chef) + '</span>')
+    +     '<span class="price">' + taka(it.price) + '</span>'
+    +     tag
+    +     '<span class="code-tag">#' + esc(it.code) + '</span>'
+    +   '</div>'
+    + '</div>'
+    + '<button class="order" data-code="' + esc(it.code) + '"' + (out ? ' disabled' : '')
+    + ' aria-label="Order ' + esc(it.name.slice(0, 40)) + '">'
+    + (out ? 'Sold out' : 'Order') + '</button></article>';
+}
+
+const fchip = (kind, val, label) =>
+  '<span class="fchip"><span>' + esc(label) + '</span>'
+  + '<button data-chip="' + kind + '" data-val="' + esc(val) + '" '
+  + 'aria-label="Remove filter ' + esc(label) + '">\u00d7</button></span>';
+
+function renderFilterChips() {
+  const [lo, hi] = state.bounds;
+  const bits = [];
+  if (state.q.trim()) bits.push(fchip('search', '', 'Search: ' + state.q.trim()));
+  for (const c of state.picked) bits.push(fchip('chef', c, c));
+  if (state.min > lo || state.max < hi) bits.push(fchip('price', '', range(state.min, state.max)));
+  $('fchips').innerHTML = bits.join('');
+  return bits.length > 0;
 }
 
 function render() {
-  const rows = pipeline();
-  const [lo, hi] = state.bounds;
-  const dirty = state.q !== '' || state.picked.size > 0 || state.min > lo || state.max < hi;
-
-  $('count').textContent = rows.length + (rows.length === 1 ? ' dish' : ' dishes')
-    + (dirty ? ' of ' + state.items.length : '');
+  const rows = filtered();
+  const dirty = renderFilterChips();
   $('clear').hidden = !dirty;
+  syncChips();
+
+  const chefCount = new Set(rows.map((r) => r.chef)).size;
+  $('count').textContent = rows.length
+    ? rows.length + (rows.length === 1 ? ' dish' : ' dishes') + ' from '
+      + chefCount + (chefCount === 1 ? ' chef' : ' chefs')
+    : 'No matches';
 
   if (!rows.length) {
-    main.innerHTML = '<div class="notice"><strong>No dishes match</strong>'
-      + 'Try a different search, or widen the price range.</div>';
+    main.innerHTML = '<div class="empty-state"><h3>No dishes match</h3>'
+      + 'Try a different search, widen the price range, or drop the chef filter.'
+      + '<br><button id="clearEmpty">Clear all filters</button></div>';
+    $('clearEmpty').onclick = () => $('clear').click();
     return;
   }
-  main.innerHTML = rows.map((it) => {
-    const out = it.available <= 0, low = !out && it.available <= LOW_STOCK;
-    const tag = out ? '<span class="tag sold">Sold out</span>'
-      : low ? '<span class="tag low">Only ' + it.available + ' left</span>'
-            : it.available + ' left';
-    return '<article class="item' + (out ? ' out' : '') + '">'
-      + '<h2 class="name" lang="bn">' + esc(it.name) + '</h2>'
-      + '<p class="meta"><b>' + esc(it.chef) + '</b><span>' + tag + '</span>'
-      + '<span>#' + esc(it.code) + '</span></p>'
-      + '<div class="price">' + taka(it.price) + '</div>'
-      + '<button class="order" data-code="' + esc(it.code) + '"' + (out ? ' disabled' : '')
-      + ' aria-label="Order ' + esc(it.name.slice(0, 40)) + '">'
-      + (out ? 'Sold out' : 'Order') + '</button></article>';
-  }).join('');
+
+  if (!state.grouped) {
+    main.innerHTML = '<section class="tier">'
+      + rows.sort(ITEM_SORT[state.sort]).map(dishHTML).join('') + '</section>';
+    return;
+  }
+
+  main.innerHTML = grouped(rows).map((g) =>
+    '<section class="tier" id="chef-' + slug(g.chef) + '">'
+    + '<header class="ghead"><h2>' + esc(g.chef) + '</h2>'
+    + '<span class="gmeta">' + g.items.length + (g.items.length === 1 ? ' dish \u00b7 ' : ' dishes \u00b7 ')
+    + range(g.min, g.max) + '</span></header>'
+    + g.items.map(dishHTML).join('') + '</section>').join('');
 }
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /* --- Filter controls ---------------------------------------------------- */
 function syncSlider() {
   const [lo, hi] = state.bounds, span = Math.max(1, hi - lo);
   $('fill').style.left  = ((state.min - lo) / span * 100) + '%';
   $('fill').style.width = ((state.max - state.min) / span * 100) + '%';
-  $('priceLabel').textContent = taka(state.min) + '\u2013' + taka(state.max);
+  $('priceLabel').textContent = range(state.min, state.max);
+}
+function syncChips() {
+  for (const b of $('chipRail').querySelectorAll('.chip')) {
+    b.setAttribute('aria-pressed', String(state.picked.has(b.dataset.chef)));
+  }
 }
 
 function buildFilters() {
@@ -378,54 +592,56 @@ function buildFilters() {
 
   const counts = new Map();
   for (const it of state.items) counts.set(it.chef, (counts.get(it.chef) || 0) + 1);
-  state.chefs = [...counts.keys()].sort((a, b) => a.localeCompare(b));
-  $('chefMenu').innerHTML = state.chefs.map((c) =>
-    '<label><input type="checkbox" value="' + esc(c) + '">' + esc(c)
-    + '<span class="cnt">' + counts.get(c) + '</span></label>').join('');
+  // The rail is the chef multi-select: tap to add, tap again to remove.
+  $('chipRail').innerHTML = [...counts.keys()].sort((a, b) => a.localeCompare(b)).map((c) =>
+    '<button class="chip" data-chef="' + esc(c) + '" aria-pressed="false">'
+    + esc(c) + '<span class="n">' + counts.get(c) + '</span></button>').join('');
+
+  $('statChefs').textContent = counts.size;
+  $('statDishes').textContent = state.items.length;
+  $('statPrice').textContent = range(lo, hi);
 }
 
-function chefLabel() {
-  const n = state.picked.size;
-  $('chefBtn').textContent = n === 0 ? 'All chefs'
-    : n === 1 ? [...state.picked][0] : n + ' chefs selected';
-}
-
-/* --- Order modal -------------------------------------------------------- */
+/* --- Order sheet -------------------------------------------------------- */
 let lastFocused = null;
 
-function openModal(item) {
+function openSheet(item) {
   lastFocused = document.activeElement;
   const saved = store.read() || {};
   const qtyMax = Math.min(50, Math.max(1, item.available));
   const configured = Boolean(ORDER.endpoint);
+  const photo = item.images && item.images.length
+    ? '<div class="thumb"><img src="' + esc(item.images[0]) + '" alt="" '
+      + 'onerror="this.parentNode.classList.add(\'none\');this.remove()"></div>'
+    : '<div class="thumb none"></div>';
 
   const scrim = document.createElement('div');
   scrim.className = 'scrim';
   scrim.innerHTML =
-    '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">'
-    + '<h2 id="mTitle">Order this dish</h2>'
-    + '<p class="dish" lang="bn">' + esc(item.name) + ' \u00b7 ' + esc(item.chef) + '</p>'
+    '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">'
+    + '<div class="shead">' + photo + '<div><h2 id="mTitle">Order from ' + esc(item.chef) + '</h2>'
+    + '<p class="dish" lang="bn">' + esc(item.name) + '</p></div></div>'
     + '<div class="two">'
-    +   '<div class="f"><label for="mCode">Menu code</label>'
+    +   '<div class="f"><label for="mCode">' + icon('ic-hash') + 'Menu code</label>'
     +     '<input id="mCode" value="' + esc(item.code) + '" readonly></div>'
-    +   '<div class="f"><label for="mQty">Quantity</label><select id="mQty">'
+    +   '<div class="f"><label for="mQty">' + icon('ic-bag') + 'Quantity</label><select id="mQty">'
     +     Array.from({ length: qtyMax }, (_, i) => '<option>' + (i + 1) + '</option>').join('')
     +   '</select></div>'
     + '</div>'
-    + '<div class="f"><label for="mName">Your name</label>'
+    + '<div class="f"><label for="mName">' + icon('ic-user') + 'Your name</label>'
     +   '<input id="mName" autocomplete="name" value="' + esc(saved.name || '') + '"></div>'
     + '<div class="two">'
-    +   '<div class="f"><label for="mPhone">Phone</label>'
+    +   '<div class="f"><label for="mPhone">' + icon('ic-phone') + 'Phone</label>'
     +     '<input id="mPhone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(saved.phone || '') + '"></div>'
-    +   '<div class="f"><label for="mWa">WhatsApp</label>'
+    +   '<div class="f"><label for="mWa">' + icon('ic-whatsapp') + 'WhatsApp</label>'
     +     '<input id="mWa" type="tel" inputmode="tel" value="' + esc(saved.whatsapp || '') + '"></div>'
     + '</div>'
-    + '<div class="f"><label for="mEmail">Email</label>'
+    + '<div class="f"><label for="mEmail">' + icon('ic-mail') + 'Email</label>'
     +   '<input id="mEmail" type="email" autocomplete="email" value="' + esc(saved.email || '') + '"></div>'
-    + '<div class="f"><label for="mAddr">Delivery address</label>'
+    + '<div class="f"><label for="mAddr">' + icon('ic-pin-s') + 'Delivery address</label>'
     +   '<textarea id="mAddr" autocomplete="street-address">' + esc(saved.address || '') + '</textarea></div>'
     + '<button class="submit" id="mGo">' + (configured ? 'Place order' : 'Continue on Foosto') + '</button>'
-    + '<div class="modal-foot">'
+    + '<div class="sheet-foot">'
     +   '<button class="linkbtn" id="mCancel">Cancel</button>'
     +   '<button class="linkbtn" id="mForget"' + (Object.keys(saved).length ? '' : ' hidden') + '>Clear saved details</button>'
     + '</div>'
@@ -456,7 +672,7 @@ function openModal(item) {
   scrim.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') close();
     if (e.key !== 'Tab') return;
-    const f = scrim.querySelectorAll('button:not([hidden]),input,select,textarea');           // simple focus trap
+    const f = scrim.querySelectorAll('button:not([hidden]),input,select,textarea');   // focus trap
     const first = f[0], last = f[f.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
@@ -508,7 +724,7 @@ function openModal(item) {
         + '. Foosto will confirm on ' + esc(v.phone) + '.');
       btn.textContent = 'Order placed';
     } catch (err) {
-      // Modal stays open and every field keeps its value, so nothing is retyped.
+      // Sheet stays open and every field keeps its value, so nothing is retyped.
       say('bad', esc(err.message) + ' Your details are still here \u2014 try again.');
       btn.disabled = false; btn.textContent = 'Place order';
     }
@@ -517,11 +733,11 @@ function openModal(item) {
 
 /* --- Boot --------------------------------------------------------------- */
 function showSkeleton() {
-  main.innerHTML = '<div class="skel"><div></div><div></div></div>'.repeat(6);
+  main.innerHTML = '<div class="skel"><i></i><div><u></u><u></u></div></div>'.repeat(6);
   $('count').textContent = 'Loading today\u2019s menu\u2026';
 }
 function showError(msg) {
-  main.innerHTML = '<div class="notice"><strong>Couldn\u2019t load the menu</strong>'
+  main.innerHTML = '<div class="empty-state"><h3>Couldn\u2019t load the menu</h3>'
     + esc(msg) + '<br>Check your connection, then try again.'
     + '<br><button id="retry">Try again</button></div>';
   $('count').textContent = '';
@@ -534,16 +750,16 @@ async function boot() {
     const data = await loadMenu();
     state.items = data.items;
     buildFilters();
-    chefLabel();
     const when = new Date(data.changedAt || data.checkedAt);
-    $('freshness').textContent = 'Menu updated ' + when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    $('freshness').textContent = when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    $('freshItem').hidden = false;
     render();
   } catch (err) {
     showError(err.message);
   }
 }
 
-/* Events */
+/* --- Events ------------------------------------------------------------- */
 let debounce;
 $('q').addEventListener('input', (e) => {
   clearTimeout(debounce);
@@ -556,28 +772,38 @@ $('pmin').addEventListener('input', (e) => {
 $('pmax').addEventListener('input', (e) => {
   state.max = Math.max(+e.target.value, state.min); e.target.value = state.max; syncSlider(); render();
 });
-$('chefBtn').addEventListener('click', () => {
-  const open = $('chefMenu').hidden;
-  $('chefMenu').hidden = !open;
-  $('chefBtn').setAttribute('aria-expanded', String(open));
-});
-$('chefMenu').addEventListener('change', (e) => {
-  e.target.checked ? state.picked.add(e.target.value) : state.picked.delete(e.target.value);
-  chefLabel(); render();
-});
-document.addEventListener('click', (e) => {
-  if (!$('multi').contains(e.target)) { $('chefMenu').hidden = true; $('chefBtn').setAttribute('aria-expanded', 'false'); }
+$('groupBtn').addEventListener('click', (e) => {
+  state.grouped = !state.grouped;
+  e.target.setAttribute('aria-pressed', String(state.grouped));
+  e.target.textContent = state.grouped ? 'Grouped by chef' : 'One flat list';
+  render();
 });
 $('toggleFilters').addEventListener('click', (e) => {
   const open = $('panel').hidden;
   $('panel').hidden = !open;
   e.target.setAttribute('aria-expanded', String(open));
 });
+$('chipRail').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  const chef = b.dataset.chef;
+  state.picked.has(chef) ? state.picked.delete(chef) : state.picked.add(chef);
+  render();
+});
+$('fchips').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-chip]');
+  if (!b) return;
+  if (b.dataset.chip === 'search') { state.q = ''; $('q').value = ''; }
+  if (b.dataset.chip === 'chef') state.picked.delete(b.dataset.val);
+  if (b.dataset.chip === 'price') {
+    [state.min, state.max] = state.bounds;
+    $('pmin').value = state.min; $('pmax').value = state.max; syncSlider();
+  }
+  render();
+});
 $('clear').addEventListener('click', () => {
   state.q = ''; $('q').value = '';
   state.picked.clear();
-  $('chefMenu').querySelectorAll('input').forEach((i) => { i.checked = false; });
-  chefLabel();
   [state.min, state.max] = state.bounds;
   $('pmin').value = state.min; $('pmax').value = state.max;
   syncSlider(); render();
@@ -586,8 +812,22 @@ main.addEventListener('click', (e) => {
   const btn = e.target.closest('.order');
   if (!btn || btn.disabled) return;
   const item = state.items.find((i) => i.code === btn.dataset.code);
-  if (item) openModal(item);
+  if (item) openSheet(item);
 });
+
+$('topFab').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('scroll', () => {
+  $('topFab').classList.toggle('show', window.scrollY > 700);
+}, { passive: true });
+
+// Chef sections use scroll-margin-top so anchors clear the sticky topbar,
+// whose height changes when the sort panel opens or filter chips wrap.
+const topbar = document.querySelector('.topbar');
+const setBarH = () => document.documentElement.style
+  .setProperty('--barH', topbar.getBoundingClientRect().height + 'px');
+if (window.ResizeObserver) new ResizeObserver(setBarH).observe(topbar);
+window.addEventListener('resize', setBarH);
+setBarH();
 
 tickClock(); setInterval(tickClock, 1000);
 boot();
