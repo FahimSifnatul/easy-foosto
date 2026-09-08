@@ -9,8 +9,7 @@ on:
     # cleanly but simply will not run every minute, so don't write one.
     # Runs are also queued and can be delayed at busy times, which is why these
     # start at :02 and :17 rather than on the hour.
-    - cron: '2-59/5 0-4 * * *'   # every 5 min, 06:00-11:00 Dhaka
-    - cron: '17 5-23 * * *'      # hourly the rest of the day
+    - cron: '45 * * * *'
   workflow_dispatch:              # manual "Run workflow" button
 
 permissions:
