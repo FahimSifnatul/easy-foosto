@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Design tokens ---------- */
+  :root{
+    --bg: #F3E9D2;
+    --bg-soft: #EADFC4;
+    --surface: #FFFCF5;
+    --ink: #2B1D12;
+    --ink-soft: #7A6650;
+    --ink-faint: #A8977E;
+    --brand-dark: #3B2B20;
+    --brand-dark-2: #241A12;
+    --gold: #B87F17;
+    --gold-bg: #F0DDA9;
+    --green: #52684A;
+    --green-bg: #DCE4CF;
+    --brick: #A2402F;
+    --brick-bg: #F1D6CC;
+    --border: #DDCBA6;
+    --focus: #7A4E12;
+    --shadow: 0 1px 2px rgba(43,29,18,0.06);
+    --radius-s: 6px;
+    --radius-m: 12px;
+    --radius-l: 22px;
+    --maxw: 760px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #1C140D;
+      --bg-soft: #241A11;
+      --surface: #2A1F15;
+      --ink: #F3E9D2;
+      --ink-soft: #C9B896;
+      --ink-faint: #8B7A62;
+      --brand-dark: #120C08;
+      --brand-dark-2: #0B0704;
+      --gold: #E3AF3F;
+      --gold-bg: #3E2F14;
+      --green: #90AB80;
+      --green-bg: #26301F;
+      --brick: #E0806A;
+      --brick-bg: #3B1F19;
+      --border: #3A2C1C;
+      --focus: #E3AF3F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #1C140D; --bg-soft:#241A11; --surface:#2A1F15; --ink:#F3E9D2; --ink-soft:#C9B896; --ink-faint:#8B7A62;
+    --brand-dark:#120C08; --brand-dark-2:#0B0704; --gold:#E3AF3F; --gold-bg:#3E2F14; --green:#90AB80; --green-bg:#26301F;
+    --brick:#E0806A; --brick-bg:#3B1F19; --border:#3A2C1C; --focus:#E3AF3F; --shadow:0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Hind Siliguri', 'Inter', system-ui, sans-serif;
+    line-height:1.6;
+  }
+  ::selection{ background:var(--gold-bg); color:var(--ink); }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  h1,h2,h3{ font-family:'Baloo Da 2','Hind Siliguri',sans-serif; margin:0; }
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  :focus-visible{ outline:2.5px solid var(--focus); outline-offset:2px; }
+
+  /* ---------- Layout shell ---------- */
+  .app{ max-width:var(--maxw); margin:0 auto; padding:0 18px 90px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:30;
+    background:var(--brand-dark);
+    color:#F3E9D2;
+    padding-top:max(14px, env(safe-area-inset-top));
+    box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  }
+  .topbar-inner{ max-width:var(--maxw); margin:0 auto; padding:0 18px 12px; }
+  .brand-row{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{ width:34px; height:34px; flex:none; color:#E3AF3F; }
+  .brand-name{ font-size:1.35rem; font-weight:700; letter-spacing:0.2px; }
+  .brand-tagline{ font-size:0.82rem; color:#D8C6A3; margin-top:1px; }
+
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center;
+    margin-top:12px; font-size:0.82rem; color:#E7D9BA;
+  }
+  .meta-item{ display:flex; align-items:center; gap:6px; }
+  .meta-item svg{ width:15px; height:15px; flex:none; color:#E3AF3F; }
+  .meta-item strong{ color:#FBF3DE; font-weight:600; }
+
+  .search-row{ margin-top:12px; position:relative; }
+  .search-row svg{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:17px; height:17px; color:#B7A481; pointer-events:none;
+  }
+  .search-input{
+    width:100%; padding:10px 14px 10px 36px;
+    border-radius:var(--radius-m); border:1px solid rgba(255,255,255,0.14);
+    background:rgba(255,255,255,0.08); color:#FBF3DE; font-size:0.95rem;
+  }
+  .search-input::placeholder{ color:#B7A481; }
+  .search-input:focus-visible{ outline:2.5px solid #E3AF3F; outline-offset:1px; }
+
+  .chip-rail{
+    display:flex; gap:8px; overflow-x:auto; margin-top:12px; padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .chip-rail::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:none; padding:7px 14px; border-radius:999px; font-size:0.85rem; font-weight:600;
+    background:rgba(255,255,255,0.07); color:#E7D9BA; border:1px solid rgba(255,255,255,0.12);
+    cursor:pointer; white-space:nowrap; transition:background .15s ease, color .15s ease;
+  }
+  .chip:hover{ background:rgba(255,255,255,0.14); }
+  .chip.active{ background:#E3AF3F; color:#2A1B06; border-color:#E3AF3F; }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding:30px 0 22px; }
+  .hero h1{
+    font-size:clamp(1.7rem, 5vw, 2.5rem); font-weight:700; color:var(--ink);
+    max-width:19ch;
+  }
+  .hero p{
+    margin:10px 0 0; color:var(--ink-soft); font-size:1rem; max-width:56ch;
+  }
+  .hero-stats{ display:flex; gap:22px; margin-top:18px; flex-wrap:wrap; }
+  .hero-stat b{ display:block; font-family:'Baloo Da 2',sans-serif; font-size:1.4rem; color:var(--gold); }
+  .hero-stat span{ font-size:0.8rem; color:var(--ink-soft); }
+
+  /* ---------- Chef tiers ---------- */
+  .tier{ margin-top:8px; scroll-margin-top:170px; }
+  .tier-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+    padding:14px 0 10px 14px; margin-top:22px;
+    border-left:4px solid var(--tier-accent, var(--gold));
+  }
+  .tier-head h2{ font-size:1.22rem; font-weight:600; color:var(--ink); }
+  .tier-count{ font-size:0.8rem; color:var(--ink-faint); white-space:nowrap; }
+
+  .dish{
+    display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+    padding:14px 4px; border-bottom:1px solid var(--border);
+  }
+  .dish:last-child{ border-bottom:none; }
+  .dish-info{ min-width:0; }
+  .dish-desc{ font-size:1.01rem; color:var(--ink); }
+  .dish-facts{
+    display:flex; flex-wrap:wrap; gap:8px 10px; margin-top:7px; font-size:0.82rem; color:var(--ink-soft);
+    align-items:center;
+  }
+  .price-tag{ font-weight:600; color:var(--ink); }
+  .code-tag{
+    font-variant-numeric:tabular-nums; background:var(--bg-soft); border:1px solid var(--border);
+    padding:1px 7px; border-radius:5px; color:var(--ink-soft);
+  }
+  .avail-tag{ padding:1px 8px; border-radius:999px; font-weight:600; }
+  .avail-ok{ background:var(--green-bg); color:var(--green); }
+  .avail-low{ background:var(--brick-bg); color:var(--brick); }
+
+  .order-btn{
+    flex:none; align-self:center;
+    background:var(--gold); color:#2A1B06; border:none; border-radius:999px;
+    padding:9px 18px; font-size:0.9rem; font-weight:700; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .order-btn:hover{ filter:brightness(1.06); }
+  .order-btn:active{ transform:scale(0.97); }
+
+  .empty-state{
+    margin-top:40px; padding:34px 18px; text-align:center; color:var(--ink-soft);
+    border:1px dashed var(--border); border-radius:var(--radius-m);
+  }
+  .empty-state h3{ font-size:1.1rem; color:var(--ink); margin-bottom:6px; }
+  .empty-state button{
+    margin-top:14px; background:none; border:1px solid var(--border); color:var(--ink);
+    padding:8px 16px; border-radius:999px; cursor:pointer; font-size:0.85rem;
+  }
+
+  footer.note{
+    margin-top:44px; padding-top:18px; border-top:1px solid var(--border);
+    font-size:0.8rem; color:var(--ink-faint); line-height:1.7;
+  }
+
+  /* ---------- Back to top ---------- */
+  .top-fab{
+    position:fixed; right:18px; bottom:18px; z-index:20;
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--border);
+    background:var(--surface); color:var(--ink); box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .top-fab.show{ opacity:1; pointer-events:auto; }
+  .top-fab svg{ width:18px; height:18px; }
+
+  /* ---------- Order sheet ---------- */
+  .scrim{
+    position:fixed; inset:0; background:rgba(20,13,7,0.5); z-index:40;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .scrim.show{ opacity:1; pointer-events:auto; }
+
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    max-width:var(--maxw); margin:0 auto;
+    background:var(--surface); color:var(--ink);
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 30px rgba(0,0,0,0.25);
+    transform:translateY(100%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1);
+    max-height:92vh; overflow-y:auto;
+    padding:18px 20px calc(22px + env(safe-area-inset-bottom));
+  }
+  .sheet.show{ transform:translateY(0); }
+  @media (min-width:560px){
+    .sheet{ left:50%; right:auto; bottom:5vh; transform:translate(-50%,40px); border-radius:20px; width:min(94vw, 480px); opacity:0; transition:transform .22s ease, opacity .22s ease; }
+    .sheet.show{ transform:translate(-50%,0); opacity:1; }
+    .scrim{ }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sheet, .scrim{ transition:none; }
+  }
+
+  .sheet-handle{ width:38px; height:4px; border-radius:2px; background:var(--border); margin:0 auto 14px; }
+  .sheet-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .sheet-head h2{ font-size:1.2rem; }
+  .sheet-close{
+    background:none; border:none; color:var(--ink-soft); cursor:pointer; padding:4px; flex:none;
+  }
+  .sheet-close svg{ width:20px; height:20px; }
+
+  .sheet-item-card{
+    margin-top:14px; background:var(--bg-soft); border-radius:var(--radius-m); padding:12px 14px;
+  }
+  .sheet-item-card .desc{ font-size:0.95rem; }
+  .sheet-item-card .chef{ font-size:0.8rem; color:var(--ink-soft); margin-top:3px; }
+  .sheet-item-card .code-line{
+    margin-top:8px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;
+  }
+  .code-badge{
+    font-family:'Baloo Da 2',sans-serif; font-weight:700; color:var(--gold);
+    background:var(--gold-bg); padding:2px 10px; border-radius:6px; letter-spacing:0.5px;
+  }
+
+  .field-group{ margin-top:16px; }
+  .field-label{
+    display:flex; align-items:center; gap:6px; font-size:0.85rem; font-weight:600; color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field-label svg{ width:15px; height:15px; }
+  .req{ color:var(--brick); }
+  .field-input{
+    width:100%; padding:11px 13px; border-radius:var(--radius-s); border:1px solid var(--border);
+    background:var(--surface); color:var(--ink); font-size:0.98rem; font-family:inherit;
+  }
+  .field-input:focus-visible{ outline:2.5px solid var(--focus); outline-offset:1px; }
+  textarea.field-input{ resize:vertical; min-height:64px; }
+
+  .qty-row{ display:flex; align-items:center; gap:14px; }
+  .qty-btn{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface);
+    color:var(--ink); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .qty-btn:active{ transform:scale(0.94); }
+  .qty-value{ font-family:'Baloo Da 2',sans-serif; font-size:1.15rem; min-width:26px; text-align:center; }
+
+  .total-row{
+    margin-top:16px; display:flex; justify-content:space-between; align-items:baseline;
+    padding-top:12px; border-top:1px dashed var(--border); font-size:0.95rem;
+  }
+  .total-row b{ font-family:'Baloo Da 2',sans-serif; font-size:1.25rem; color:var(--gold); }
+
+  .cta-primary{
+    display:block; width:100%; text-align:center; text-decoration:none;
+    margin-top:18px; background:var(--gold); color:#2A1B06; border:none; border-radius:var(--radius-m);
+    padding:14px; font-size:1rem; font-weight:700; cursor:pointer;
+  }
+  .cta-primary:active{ transform:scale(0.99); }
+  .cta-note{ margin-top:9px; font-size:0.78rem; color:var(--ink-faint); text-align:center; line-height:1.6; }
+  .cta-secondary{
+    display:block; text-align:center; margin-top:10px; font-size:0.85rem; color:var(--ink-soft);
+    text-decoration:underline; text-underline-offset:3px;
+  }
+
+  .copy-panel{
+    margin-top:14px; display:none;
+  }
+  .copy-panel.show{ display:block; }
+  .copy-panel textarea{
+    width:100%; min-height:120px; font-family:ui-monospace, monospace; font-size:0.78rem;
+    padding:10px; border-radius:var(--radius-s); border:1px solid var(--border); background:var(--bg-soft); color:var(--ink);
+  }
+  .confirm-banner{
+    display:none; align-items:center; gap:8px; margin-top:14px; padding:10px 12px;
+    background:var(--green-bg); color:var(--green); border-radius:var(--radius-s); font-size:0.85rem; font-weight:600;
+  }
+  .confirm-banner.show{ display:flex; }
+  .confirm-banner svg{ width:16px; height:16px; flex:none; }
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-tiffin" viewBox="0 0 48 48">
+    <path d="M12 8c0-1.7 5.4-3 12-3s12 1.3 12 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="9" y="8" width="30" height="7" rx="2" fill="currentColor" opacity="0.9"/>
+    <rect x="10.5" y="16.5" width="27" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <rect x="10.5" y="27" width="27" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <rect x="9" y="37.5" width="30" height="4.5" rx="2" fill="currentColor" opacity="0.9"/>
+  </symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3.2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.6" r="2.4" fill="currentColor"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-4.6-4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="ic-up" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24"><path d="M7 4h2.2l1 4-2 1.6a11 11 0 0 0 5.2 5.2l1.6-2 4 1v2.2c0 1-.9 1.8-1.9 1.6C10.6 16.9 7.1 13.4 6.4 7.9 6.2 6.9 6 6 7 4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1-4 4.2-6 7-6s6 2 7 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="ic-whatsapp" viewBox="0 0 24 24"><path d="M7 17.4 4.6 20l.9-3.2A7.9 7.9 0 1 1 12 20a8 8 0 0 1-5-1.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 9.6c0 3 2.4 5.4 5.4 5.4l.6-1.4-1.8-1-1 .6a4 4 0 0 1-2-2l.6-1-1-1.6Z" fill="currentColor"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 7 12 13l7.5-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-hash" viewBox="0 0 24 24"><path d="M9 4 7 20M17 4l-2 16M4.5 9h15M3.5 15h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="ic-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+</svg>
+
+<div class="app">
+
+  <div class="topbar" role="banner">
+    <div class="topbar-inner">
+      <div class="brand-row">
+        <svg class="brand-mark" viewBox="0 0 48 48"><use href="#ic-tiffin"/></svg>
+        <div>
+          <div class="brand-name">Foosto Tiffin</div>
+          <div class="brand-tagline">ঘরের রান্না, আপনার ডেস্কে</div>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg> Order by <strong id="cutoffTime">10:20 AM</strong> today</span>
+        <span class="meta-item"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Gulshan · Banani · Tejgaon · Mohakhali · Badda</span>
+      </div>
+      <div class="search-row">
+        <svg viewBox="0 0 24 24"><use href="#ic-search"/></svg>
+        <input id="searchInput" class="search-input" type="search" placeholder="Search a dish or a chef's name" aria-label="Search dishes or chefs">
+      </div>
+      <div id="chipRail" class="chip-rail" role="tablist" aria-label="Jump to a chef"></div>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero">
+      <h1>আজকের ঘরোয়া রান্না</h1>
+      <p>Home cooks near you are cooking lunch right now. Pick a plate, and we'll get your order across to Foosto with the menu code already filled in.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><b id="statChefs">–</b><span>home chefs today</span></div>
+        <div class="hero-stat"><b id="statDishes">–</b><span>dishes on the menu</span></div>
+        <div class="hero-stat"><b id="statPrice">–</b><span>price range</span></div>
+      </div>
+    </section>
+
+    <section id="menuList" aria-label="Today's menu"></section>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <h3>No dishes match that search</h3>
+      <p>Try a shorter word, or search a chef's name instead.</p>
+      <button id="clearSearchBtn" type="button">Clear search</button>
+    </div>
+  </main>
+
+  <footer class="note">
+    Menu scraped from <a href="https://menu.foosto.com" target="_blank" rel="noopener">menu.foosto.com</a> — prices, codes and availability shown as listed there on 2026-09-08. Placing an order hands your details to Foosto's own order form; this page isn't affiliated with Foosto.
+  </footer>
+</div>
+
+<button id="topFab" class="top-fab" type="button" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><use href="#ic-up"/></svg>
+</button>
+
+<div id="scrim" class="scrim"></div>
+
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="sheetTitle">Complete your order</h2>
+    <button class="sheet-close" id="sheetClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24"><use href="#ic-close"/></svg>
+    </button>
+  </div>
+
+  <div class="sheet-item-card">
+    <div class="desc" id="sheetDesc">–</div>
+    <div class="chef" id="sheetChef">–</div>
+    <div class="code-line">
+      <span>Menu code (filled in for you)</span>
+      <span class="code-badge" id="sheetCode">–</span>
+    </div>
+  </div>
+
+  <form id="orderForm">
+    <div class="field-group">
+      <div class="field-label"><svg viewBox="0 0 24 24"><use href="#ic-bag"/></svg> Quantity</div>
+      <div class="qty-row">
+        <button type="button" class="qty-btn" id="qtyMinus" aria-label="Decrease quantity">−</button>
+        <span class="qty-value" id="qtyValue">1</span>
+        <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase quantity">+</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="fPhone"><svg viewBox="0 0 24 24"><use href="#ic-phone"/></svg> Phone <span class="req">*</span></label>
+      <input class="field-input" id="fPhone" name="phone" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="fName"><svg viewBox="0 0 24 24"><use href="#ic-user"/></svg> Customer name <span class="req">*</span></label>
+      <input class="field-input" id="fName" name="name" type="text" placeholder="Your full name" required>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="fWhatsapp"><svg viewBox="0 0 24 24"><use href="#ic-whatsapp"/></svg> WhatsApp phone</label>
+      <input class="field-input" id="fWhatsapp" name="whatsapp" type="tel" inputmode="tel" placeholder="If different from above">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="fEmail"><svg viewBox="0 0 24 24"><use href="#ic-mail"/></svg> Email</label>
+      <input class="field-input" id="fEmail" name="email" type="email" placeholder="you@example.com">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="fAddress"><svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg> Delivery address <span class="req">*</span></label>
+      <textarea class="field-input" id="fAddress" name="address" placeholder="House, road, area (e.g. Gulshan-1)" required></textarea>
+    </div>
+
+    <div class="total-row">
+      <span>Total</span>
+      <b id="totalPrice">৳0</b>
+    </div>
+
+    <button type="submit" class="cta-primary" id="submitBtn">Copy details &amp; continue to Foosto</button>
+    <p class="cta-note">Foosto doesn't offer one-tap ordering from other apps yet, so we copy your order and open Foosto's own form — paste it in to finish. Nothing is sent anywhere until you submit it there.</p>
+
+    <div class="confirm-banner" id="confirmBanner">
+      <svg viewBox="0 0 24 24"><use href="#ic-hash"/></svg>
+      <span>Copied — opening Foosto's order form in a new tab.</span>
+    </div>
+
+    <div class="copy-panel" id="copyPanel">
+      <textarea id="copyText" readonly aria-label="Order summary to paste"></textarea>
+    </div>
+
+    <a class="cta-secondary" id="messengerLink" href="https://www.facebook.com/foosto.bd/" target="_blank" rel="noopener">Prefer chat? Order via Foosto's Messenger instead</a>
+  </form>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     Menu data — scraped from https://menu.foosto.com on 2026-09-08.
+     Re-run scraper.py against the live site and paste its JSON
+     output here (as MENU_DATA) to refresh for a new day's menu.
+     ============================================================ */
+  var MENU_DATA = [
+    { name:"Mst Farzana (Toma)", accent:"gold", items:[
+      { code:"53486", desc:"সাদা ভাত, লইট্টা মাছ চরচরি, সবজি ভাজি, ডাল ভুনা, সালাদ লেবু", price:191, available:10 },
+      { code:"54906", desc:"সাদা ভাত, সোনালি মোরগ ভূনা, সবজি ভাজি, ডাল ভুনা, সালাদ লেবু", price:192, available:10 }
+    ]},
+    { name:"Soneka Begum", accent:"green", items:[
+      { code:"62231", desc:"সোনালি মুরগি আলু দিয়ে ঝোল, আলু ভর্তা, ডাল, ভাত, সালাদ", price:192, available:9 },
+      { code:"67519", desc:"কাচকি মাছ টমেটো দিয়ে, আলু ভর্তা, ডাল, ভাত, সালাদ", price:166, available:9 }
+    ]},
+    { name:"Shathi Akter", accent:"brick", items:[
+      { code:"67201", desc:"শিং মাছ ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:167, available:10 },
+      { code:"67235", desc:"সোনালি মুরগি আলু দিয়ে ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:192, available:10 },
+      { code:"69271", desc:"কৈ মাছ টমেটো দিয়ে ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:168, available:6 }
+    ]},
+    { name:"Asma", accent:"gold", items:[
+      { code:"67265", desc:"ভাত, ডিম ভাজা, ফেউয়া শুটকি ভর্তা, পেপে ভর্তা, আলু ভর্তা, ডাল, লেবু মরিচ", price:166, available:10 },
+      { code:"67301", desc:"খিচুড়ি, ডিম ভাজা, ফেউয়া শুটকি ভর্তা, পেঁপে ভর্তা, আলু ভর্তা, লেবু মরিচ পেয়াজ", price:166, available:9 },
+      { code:"69544", desc:"ভাত, ডিম ভুনা, ফেউয়া শুটকি ভর্তা, আলু ভর্তা, ডাল লেবু মরিচ", price:166, available:6 }
+    ]},
+    { name:"Masuma Khatun", accent:"green", items:[
+      { code:"68606", desc:"উত্তর বঙ্গের বিখ্যাত ডিম তেলানি, চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাত", price:161, available:8 },
+      { code:"68750", desc:"সোনালি মুরগি আলু দিয়ে ঝোল, চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:192, available:10 },
+      { code:"71173", desc:"রূপচাঁদা মাছের দোপেয়াজা (ছোট), চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাত", price:187, available:10 }
+    ]},
+    { name:"Selina Akhter", accent:"brick", items:[
+      { code:"69387", desc:"সোনালী মুরগী কষা ঝাল ভুনা আলু দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:191, available:12 },
+      { code:"69409", desc:"কৈ মাছ ঝোল ভুনা টমেটো দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:185, available:10 },
+      { code:"70830", desc:"চিংড়ি মাছের ভুনা (৪/৫ পিচ) টমেটো দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:200, available:8 }
+    ]},
+    { name:"Tanzima Akther", accent:"gold", items:[
+      { code:"69774", desc:"দেশি খুদের বৌ ভাত, ডিম ভাজা পিঁয়াজ কাঁচামরিচ, আলুর ভর্তা", price:161, available:7 },
+      { code:"69889", desc:"আস্ত ডিম ভুনা, আলু ভর্তা, ঘন ডাল, নাজির চাল", price:161, available:7 }
+    ]},
+    { name:"Ferdousi Akter", accent:"green", items:[
+      { code:"70224", desc:"বয়লার মুরগী ঝাল ভুনা, কাচা মরিচের আলু ভরতা, রুই মাছের মাথা দিয়ে মুগ ডাল, মিনিকেট চালের ভাত", price:192, available:10 },
+      { code:"70499", desc:"ডিম ভুনা, কাচা পিয়াজের মরিচের আলু ভরতা, রুই মাছের মাথা দিয়ে মুগ ডাল, সাদা ভাত", price:161, available:10 },
+      { code:"70730", desc:"রুটি (৪ পিস), বয়লার মুরগির ঝাল ভুনা, আলু ভাজি", price:182, available:10 }
+    ]},
+    { name:"Sultana Razia", accent:"brick", items:[
+      { code:"70802", desc:"মুগ ডাল দিয়ে সোনালী মুরগী মাংস ভুনা, মোজাম্মেল মিনিকেট চালের ভাত, আমড়া দিয়ে ডাল, মিক্স সবজি ভাজি, ভর্তা, সালাত", price:192, available:10 },
+      { code:"70807", desc:"সরিষার তেল দুই রকমের ডাল দিয়ে সোনা মশুরী চালের ভুনা খিচুড়ি, সোনালী মুরগী মাংস কষা ভুনা, বেগুন ভাজা, ভর্তা, সালাত", price:224, available:14 },
+      { code:"70932", desc:"চিংড়ি মাছ ভুনা (৩ পিছ), মোজাম্মেল মিনিকেট চালের ভাত, আমড়া দিয়ে ডাল, মিক্স সবজি ভাজি, ভর্তা, সালাত", price:197, available:10 }
+    ]},
+    { name:"Anita Yesmin (Khuku)", accent:"gold", items:[
+      { code:"71185", desc:"আলু দিয়ে সোনালি মুরগির ভুনা, সাদা ভাত, ডিম দিয়ে চিচিঙ্গা ভাজি, পাটশাক ডাল, সালাদ", price:192, available:10 },
+      { code:"71186", desc:"সাদা ভাত, সিম আলু টমেটো দিয়ে রুই মাছের ঝোল, পাটশাক ডাল, চিচিঙ্গা ভাজি, সালাদ", price:187, available:10 },
+      { code:"71187", desc:"নাজিরশাইল চালের খুদের ভাত, শুঁটকি আলু বড় চিংড়ি ভর্তা, ডিম ভাজি, সালাদ", price:171, available:10 }
+    ]},
+    { name:"Sharmin", accent:"green", items:[
+      { code:"71188", desc:"প্লেন পোলাও, গরুর মাংস আলু দিয়ে ভুনা, চাইনিজ ভেজিটেবল, সালাদ", price:245, available:5 },
+      { code:"71189", desc:"প্লেন পোলাও, সোনালি মুরগি কষা ভুনা, চাইনিজ ভেজিটেবল, সালাদ", price:213, available:8 },
+      { code:"71190", desc:"বড় আইড় মাছ ভুনা, ঘন ডাল, বেগুন ভর্তা, ভাত, সালাদ", price:203, available:8 }
+    ]},
+    { name:"Amena", accent:"brick", items:[
+      { code:"71191", desc:"সোনালি মুরগি আলু দিয়ে কষা ভুনা, লাউ চিংড়ি, বেগুন ভর্তা, ভাত", price:192, available:8 },
+      { code:"71192", desc:"আটার রুটি (৪ পিস), সোনালি মুরগি আলু দিয়ে কষা ভুনা, আলু ভাজি", price:189, available:9 },
+      { code:"71193", desc:"পোয়া মাছ ভুনা, লাউ চিংড়ি, বেগুন ভর্তা, ভাত", price:176, available:10 }
+    ]},
+    { name:"Samanta", accent:"gold", items:[
+      { code:"71194", desc:"টমেটো আলু দিয়ে কাতল মাছ, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:176, available:7 },
+      { code:"71195", desc:"বেগুন দিয়ে পাবদা মাছ, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:171, available:7 },
+      { code:"71196", desc:"ডিম তেলানি, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:155, available:5 }
+    ]},
+    { name:"Maymuna Munny", accent:"green", items:[
+      { code:"71197", desc:"প্লেইন পোলাও, গরুর গোশত আলু দিয়ে ভুনা, সোনালী মুরগি রোস্ট, সালাদ", price:287, available:4 },
+      { code:"71198", desc:"গরুর গোশত আলু দিয়ে ভুনা, করলা ভাজি, ইলিশ মাছের মাথা দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:229, available:5 },
+      { code:"71199", desc:"সোনালী মুরগি আলু দিয়ে ভুনা, করলা ভাজি, ইলিশ মাছের মাথা দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:203, available:5 }
+    ]}
+  ];
+
+  var FOOSTO_ORDER_URL = "http://admin.foosto.com/order/create/";
+  var slugify = function(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); };
+
+  MENU_DATA.forEach(function(chef){ chef.slug = 'chef-' + slugify(chef.name); });
+
+  /* ---------- Render menu + chip rail ---------- */
+  var menuList = document.getElementById('menuList');
+  var chipRail = document.getElementById('chipRail');
+  var totalDishes = 0, minPrice = Infinity, maxPrice = -Infinity;
+
+  MENU_DATA.forEach(function(chef){
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = chef.name;
+    chip.dataset.target = chef.slug;
+    chip.setAttribute('role','tab');
+    chipRail.appendChild(chip);
+
+    var tier = document.createElement('section');
+    tier.className = 'tier';
+    tier.id = chef.slug;
+    tier.style.setProperty('--tier-accent', 'var(--' + chef.accent + ')');
+
+    var head = document.createElement('div');
+    head.className = 'tier-head';
+    head.innerHTML = '<h2>' + chef.name + '</h2><span class="tier-count">' + chef.items.length + (chef.items.length===1?' dish':' dishes') + '</span>';
+    tier.appendChild(head);
+
+    chef.items.forEach(function(item){
+      totalDishes++;
+      minPrice = Math.min(minPrice, item.price);
+      maxPrice = Math.max(maxPrice, item.price);
+
+      var row = document.createElement('div');
+      row.className = 'dish';
+      row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
+
+      var lowStock = item.available <= 5;
+      row.innerHTML =
+        '<div class="dish-info">' +
+          '<div class="dish-desc">' + item.desc + '</div>' +
+          '<div class="dish-facts">' +
+            '<span class="price-tag">৳' + item.price + '</span>' +
+            '<span class="code-tag">Code ' + item.code + '</span>' +
+            '<span class="avail-tag ' + (lowStock ? 'avail-low' : 'avail-ok') + '">' + (lowStock ? 'Only ' + item.available + ' left' : item.available + ' available') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<button class="order-btn" type="button">Order</button>';
+
+      row.querySelector('.order-btn').addEventListener('click', function(){
+        openSheet(chef, item);
+      });
+
+      tier.appendChild(row);
+    });
+
+    menuList.appendChild(tier);
+  });
+
+  document.getElementById('statChefs').textContent = MENU_DATA.length;
+  document.getElementById('statDishes').textContent = totalDishes;
+  document.getElementById('statPrice').textContent = '৳' + minPrice + '–' + maxPrice;
+
+  /* ---------- Chip navigation + scroll-spy ---------- */
+  var chips = Array.prototype.slice.call(chipRail.children);
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var target = document.getElementById(chip.dataset.target);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  var tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
+  if ('IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        var chip = chipRail.querySelector('[data-target="' + entry.target.id + '"]');
+        if (!chip) return;
+        chips.forEach(function(c){ c.classList.remove('active'); });
+        chip.classList.add('active');
+        chip.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+      });
+    }, { rootMargin: '-160px 0px -70% 0px' });
+    tiers.forEach(function(t){ spy.observe(t); });
+  }
+  if (chips[0]) chips[0].classList.add('active');
+
+  /* ---------- Search ---------- */
+  var searchInput = document.getElementById('searchInput');
+  var emptyState = document.getElementById('emptyState');
+  function applySearch(){
+    var q = searchInput.value.trim().toLowerCase();
+    var anyVisible = false;
+    tiers.forEach(function(tier){
+      var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
+      var tierHasMatch = false;
+      rows.forEach(function(row){
+        var match = !q || row.dataset.search.indexOf(q) !== -1;
+        row.style.display = match ? '' : 'none';
+        if (match) tierHasMatch = true;
+      });
+      tier.style.display = tierHasMatch ? '' : 'none';
+      if (tierHasMatch) anyVisible = true;
+    });
+    emptyState.style.display = anyVisible ? 'none' : 'block';
+  }
+  searchInput.addEventListener('input', applySearch);
+  document.getElementById('clearSearchBtn').addEventListener('click', function(){
+    searchInput.value = '';
+    applySearch();
+    searchInput.focus();
+  });
+
+  /* ---------- Back to top ---------- */
+  var topFab = document.getElementById('topFab');
+  window.addEventListener('scroll', function(){
+    topFab.classList.toggle('show', window.scrollY > 700);
+  }, { passive:true });
+  topFab.addEventListener('click', function(){
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+
+  /* ---------- Order sheet ---------- */
+  var sheet = document.getElementById('sheet');
+  var scrim = document.getElementById('scrim');
+  var orderForm = document.getElementById('orderForm');
+  var currentItem = null, currentChef = null, qty = 1;
+
+  var STORAGE_KEY = 'foosto-tiffin-customer-details';
+  function loadSavedDetails(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e){ return null; }
+  }
+  function saveDetails(details){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(details)); } catch(e){ /* storage unavailable, skip silently */ }
+  }
+
+  function openSheet(chef, item){
+    currentChef = chef; currentItem = item; qty = 1;
+    document.getElementById('sheetDesc').textContent = item.desc;
+    document.getElementById('sheetChef').textContent = 'Chef: ' + chef.name;
+    document.getElementById('sheetCode').textContent = item.code;
+    document.getElementById('qtyValue').textContent = qty;
+    document.getElementById('confirmBanner').classList.remove('show');
+    document.getElementById('copyPanel').classList.remove('show');
+    document.getElementById('submitBtn').textContent = 'Copy details & continue to Foosto';
+    updateTotal();
+
+    var saved = loadSavedDetails();
+    if (saved){
+      document.getElementById('fPhone').value = saved.phone || '';
+      document.getElementById('fName').value = saved.name || '';
+      document.getElementById('fWhatsapp').value = saved.whatsapp || '';
+      document.getElementById('fEmail').value = saved.email || '';
+      document.getElementById('fAddress').value = saved.address || '';
+    }
+
+    scrim.classList.add('show');
+    sheet.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260);
+  }
+  function closeSheet(){
+    scrim.classList.remove('show');
+    sheet.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('sheetClose').addEventListener('click', closeSheet);
+  scrim.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && sheet.classList.contains('show')) closeSheet();
+  });
+
+  function updateTotal(){
+    document.getElementById('totalPrice').textContent = '৳' + (currentItem.price * qty);
+  }
+  document.getElementById('qtyMinus').addEventListener('click', function(){
+    qty = Math.max(1, qty - 1);
+    document.getElementById('qtyValue').textContent = qty;
+    updateTotal();
+  });
+  document.getElementById('qtyPlus').addEventListener('click', function(){
+    qty = Math.min(50, qty + 1);
+    document.getElementById('qtyValue').textContent = qty;
+    updateTotal();
+  });
+
+  function buildSummary(details){
+    return [
+      'Foosto order',
+      'Menu code: ' + currentItem.code,
+      'Dish: ' + currentItem.desc,
+      'Chef: ' + currentChef.name,
+      'Quantity: ' + qty,
+      'Price: ৳' + currentItem.price + ' each · ৳' + (currentItem.price * qty) + ' total',
+      'Name: ' + details.name,
+      'Phone: ' + details.phone,
+      'WhatsApp: ' + (details.whatsapp || '—'),
+      'Email: ' + (details.email || '—'),
+      'Address: ' + details.address
+    ].join('\n');
+  }
+
+  orderForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!orderForm.checkValidity()){
+      orderForm.reportValidity();
+      return;
+    }
+    var details = {
+      phone: document.getElementById('fPhone').value.trim(),
+      name: document.getElementById('fName').value.trim(),
+      whatsapp: document.getElementById('fWhatsapp').value.trim(),
+      email: document.getElementById('fEmail').value.trim(),
+      address: document.getElementById('fAddress').value.trim()
+    };
+    saveDetails(details);
+    var summary = buildSummary(details);
+    var copyText = document.getElementById('copyText');
+    copyText.value = summary;
+
+    var showFallback = function(){
+      document.getElementById('copyPanel').classList.add('show');
+      copyText.focus();
+      copyText.select();
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(summary).then(function(){
+        document.getElementById('confirmBanner').classList.add('show');
+      }).catch(showFallback);
+    } else {
+      showFallback();
+    }
+
+    document.getElementById('submitBtn').textContent = 'Copy again';
+    window.open(FOOSTO_ORDER_URL, '_blank', 'noopener');
+  });
+
+})();
+</script>
+</body>
+</html>
