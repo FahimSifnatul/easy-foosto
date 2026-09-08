@@ -259,6 +259,19 @@
     padding:8px 16px; border-radius:999px; cursor:pointer; font-size:0.85rem;
   }
 
+  .loading-state{
+    margin-top:40px; padding:34px 18px; text-align:center; color:var(--ink-soft);
+  }
+  .loading-spinner{
+    width:30px; height:30px; margin:0 auto 14px; border-radius:50%;
+    border:3px solid var(--border); border-top-color:var(--gold);
+    animation:foosto-spin 0.8s linear infinite;
+  }
+  @keyframes foosto-spin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){
+    .loading-spinner{ animation:none; }
+  }
+
   footer.note{
     margin-top:44px; padding-top:18px; border-top:1px solid var(--border);
     font-size:0.8rem; color:var(--ink-faint); line-height:1.7;
@@ -479,6 +492,15 @@
       </div>
     </section>
 
+    <div id="menuLoading" class="loading-state">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>Loading today's menu…</p>
+    </div>
+    <div id="menuLoadError" class="empty-state" style="display:none">
+      <h3>Couldn't load today's menu</h3>
+      <p>The menu data file didn't load — check your connection and try again.</p>
+      <button id="menuLoadRetryBtn" type="button">Retry</button>
+    </div>
     <section id="menuList" aria-label="Today's menu"></section>
     <div id="emptyState" class="empty-state" style="display:none">
       <h3>No dishes match your search or filters</h3>
@@ -488,7 +510,7 @@
   </main>
 
   <footer class="note">
-    Menu scraped from <a href="https://menu.foosto.com" target="_blank" rel="noopener">menu.foosto.com</a> — prices, codes and availability shown as listed there on 2026-09-08. Placing an order hands your details to Foosto's own order form; this page isn't affiliated with Foosto.
+    Menu scraped from <a href="https://menu.foosto.com" target="_blank" rel="noopener">menu.foosto.com</a> — prices, codes and availability shown as listed there. <span id="scrapedAtNote"></span> Placing an order hands your details to Foosto's own order form; this page isn't affiliated with Foosto.
   </footer>
 </div>
 
@@ -612,187 +634,21 @@
   } catch(e){}
 
   /* ============================================================
-     Menu data — scraped from https://menu.foosto.com on 2026-09-08.
-     Re-run scraper.py against the live site and paste its JSON
-     output here (as MENU_DATA) to refresh for a new day's menu.
+     Menu data now loads from menu-data.json (same-origin fetch, so
+     no CORS issue), which a scheduled GitHub Action keeps refreshed
+     by scraping https://menu.foosto.com/ once a day — see
+     scripts/scrape_menu.py and .github/workflows/scrape-menu.yml.
+     Nothing here needs to be hand-edited for a new day's menu.
      ============================================================ */
-  var MENU_DATA = [
-    { name:"Mst Farzana (Toma)", accent:"gold", items:[
-      { code:"53486", desc:"সাদা ভাত, লইট্টা মাছ চরচরি, সবজি ভাজি, ডাল ভুনা, সালাদ লেবু", price:191, available:10 },
-      { code:"54906", desc:"সাদা ভাত, সোনালি মোরগ ভূনা, সবজি ভাজি, ডাল ভুনা, সালাদ লেবু", price:192, available:10 }
-    ]},
-    { name:"Soneka Begum", accent:"green", items:[
-      { code:"62231", desc:"সোনালি মুরগি আলু দিয়ে ঝোল, আলু ভর্তা, ডাল, ভাত, সালাদ", price:192, available:9 },
-      { code:"67519", desc:"কাচকি মাছ টমেটো দিয়ে, আলু ভর্তা, ডাল, ভাত, সালাদ", price:166, available:9 }
-    ]},
-    { name:"Shathi Akter", accent:"brick", items:[
-      { code:"67201", desc:"শিং মাছ ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:167, available:10 },
-      { code:"67235", desc:"সোনালি মুরগি আলু দিয়ে ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:192, available:10 },
-      { code:"69271", desc:"কৈ মাছ টমেটো দিয়ে ভুনা, আলু ভর্তা, ডাল ভুনা, ভাত, সালাদ", price:168, available:6 }
-    ]},
-    { name:"Asma", accent:"gold", items:[
-      { code:"67265", desc:"ভাত, ডিম ভাজা, ফেউয়া শুটকি ভর্তা, পেপে ভর্তা, আলু ভর্তা, ডাল, লেবু মরিচ", price:166, available:10 },
-      { code:"67301", desc:"খিচুড়ি, ডিম ভাজা, ফেউয়া শুটকি ভর্তা, পেঁপে ভর্তা, আলু ভর্তা, লেবু মরিচ পেয়াজ", price:166, available:9 },
-      { code:"69544", desc:"ভাত, ডিম ভুনা, ফেউয়া শুটকি ভর্তা, আলু ভর্তা, ডাল লেবু মরিচ", price:166, available:6 }
-    ]},
-    { name:"Masuma Khatun", accent:"green", items:[
-      { code:"68606", desc:"উত্তর বঙ্গের বিখ্যাত ডিম তেলানি, চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাত", price:161, available:8 },
-      { code:"68750", desc:"সোনালি মুরগি আলু দিয়ে ঝোল, চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:192, available:10 },
-      { code:"71173", desc:"রূপচাঁদা মাছের দোপেয়াজা (ছোট), চিংড়ি মাছের বড়া, আলু ভর্তা, পুঁইশাক দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাত", price:187, available:10 }
-    ]},
-    { name:"Selina Akhter", accent:"brick", items:[
-      { code:"69387", desc:"সোনালী মুরগী কষা ঝাল ভুনা আলু দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:191, available:12 },
-      { code:"69409", desc:"কৈ মাছ ঝোল ভুনা টমেটো দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:185, available:10 },
-      { code:"70830", desc:"চিংড়ি মাছের ভুনা (৪/৫ পিচ) টমেটো দিয়ে, ঢেরস ভাজি আলু দিয়ে, ডাল ভর্তা, পুইশাক চিংড়ি মাছ দিয়ে ঝোল, মোজাম্মেল মিনিকেট ভাত, সালাদ", price:200, available:8 }
-    ]},
-    { name:"Tanzima Akther", accent:"gold", items:[
-      { code:"69774", desc:"দেশি খুদের বৌ ভাত, ডিম ভাজা পিঁয়াজ কাঁচামরিচ, আলুর ভর্তা", price:161, available:7 },
-      { code:"69889", desc:"আস্ত ডিম ভুনা, আলু ভর্তা, ঘন ডাল, নাজির চাল", price:161, available:7 }
-    ]},
-    { name:"Ferdousi Akter", accent:"green", items:[
-      { code:"70224", desc:"বয়লার মুরগী ঝাল ভুনা, কাচা মরিচের আলু ভরতা, রুই মাছের মাথা দিয়ে মুগ ডাল, মিনিকেট চালের ভাত", price:192, available:10 },
-      { code:"70499", desc:"ডিম ভুনা, কাচা পিয়াজের মরিচের আলু ভরতা, রুই মাছের মাথা দিয়ে মুগ ডাল, সাদা ভাত", price:161, available:10 },
-      { code:"70730", desc:"রুটি (৪ পিস), বয়লার মুরগির ঝাল ভুনা, আলু ভাজি", price:182, available:10 }
-    ]},
-    { name:"Sultana Razia", accent:"brick", items:[
-      { code:"70802", desc:"মুগ ডাল দিয়ে সোনালী মুরগী মাংস ভুনা, মোজাম্মেল মিনিকেট চালের ভাত, আমড়া দিয়ে ডাল, মিক্স সবজি ভাজি, ভর্তা, সালাত", price:192, available:10 },
-      { code:"70807", desc:"সরিষার তেল দুই রকমের ডাল দিয়ে সোনা মশুরী চালের ভুনা খিচুড়ি, সোনালী মুরগী মাংস কষা ভুনা, বেগুন ভাজা, ভর্তা, সালাত", price:224, available:14 },
-      { code:"70932", desc:"চিংড়ি মাছ ভুনা (৩ পিছ), মোজাম্মেল মিনিকেট চালের ভাত, আমড়া দিয়ে ডাল, মিক্স সবজি ভাজি, ভর্তা, সালাত", price:197, available:10 }
-    ]},
-    { name:"Anita Yesmin (Khuku)", accent:"gold", items:[
-      { code:"71185", desc:"আলু দিয়ে সোনালি মুরগির ভুনা, সাদা ভাত, ডিম দিয়ে চিচিঙ্গা ভাজি, পাটশাক ডাল, সালাদ", price:192, available:10 },
-      { code:"71186", desc:"সাদা ভাত, সিম আলু টমেটো দিয়ে রুই মাছের ঝোল, পাটশাক ডাল, চিচিঙ্গা ভাজি, সালাদ", price:187, available:10 },
-      { code:"71187", desc:"নাজিরশাইল চালের খুদের ভাত, শুঁটকি আলু বড় চিংড়ি ভর্তা, ডিম ভাজি, সালাদ", price:171, available:10 }
-    ]},
-    { name:"Sharmin", accent:"green", items:[
-      { code:"71188", desc:"প্লেন পোলাও, গরুর মাংস আলু দিয়ে ভুনা, চাইনিজ ভেজিটেবল, সালাদ", price:245, available:5 },
-      { code:"71189", desc:"প্লেন পোলাও, সোনালি মুরগি কষা ভুনা, চাইনিজ ভেজিটেবল, সালাদ", price:213, available:8 },
-      { code:"71190", desc:"বড় আইড় মাছ ভুনা, ঘন ডাল, বেগুন ভর্তা, ভাত, সালাদ", price:203, available:8 }
-    ]},
-    { name:"Amena", accent:"brick", items:[
-      { code:"71191", desc:"সোনালি মুরগি আলু দিয়ে কষা ভুনা, লাউ চিংড়ি, বেগুন ভর্তা, ভাত", price:192, available:8 },
-      { code:"71192", desc:"আটার রুটি (৪ পিস), সোনালি মুরগি আলু দিয়ে কষা ভুনা, আলু ভাজি", price:189, available:9 },
-      { code:"71193", desc:"পোয়া মাছ ভুনা, লাউ চিংড়ি, বেগুন ভর্তা, ভাত", price:176, available:10 }
-    ]},
-    { name:"Samanta", accent:"gold", items:[
-      { code:"71194", desc:"টমেটো আলু দিয়ে কাতল মাছ, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:176, available:7 },
-      { code:"71195", desc:"বেগুন দিয়ে পাবদা মাছ, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:171, available:7 },
-      { code:"71196", desc:"ডিম তেলানি, চিংড়ি দিয়ে করলা ভাজি, লাউ দিয়ে ডাল, ভাত, সালাদ", price:155, available:5 }
-    ]},
-    { name:"Maymuna Munny", accent:"green", items:[
-      { code:"71197", desc:"প্লেইন পোলাও, গরুর গোশত আলু দিয়ে ভুনা, সোনালী মুরগি রোস্ট, সালাদ", price:287, available:4 },
-      { code:"71198", desc:"গরুর গোশত আলু দিয়ে ভুনা, করলা ভাজি, ইলিশ মাছের মাথা দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:229, available:5 },
-      { code:"71199", desc:"সোনালী মুরগি আলু দিয়ে ভুনা, করলা ভাজি, ইলিশ মাছের মাথা দিয়ে ডাল, নাজির শাইল চালের ভাত, সালাদ", price:203, available:5 }
-    ]}
-  ];
-
   var FOOSTO_ORDER_URL = "http://admin.foosto.com/order/create/";
   var slugify = function(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); };
 
-  MENU_DATA.forEach(function(chef){ chef.slug = 'chef-' + slugify(chef.name); });
-
-  /* ---------- Render menu + chip rail ---------- */
   var menuList = document.getElementById('menuList');
   var chipRail = document.getElementById('chipRail');
-  var totalDishes = 0, minPrice = Infinity, maxPrice = -Infinity;
-
-  try {
-    MENU_DATA.forEach(function(chef){
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'chip';
-      chip.textContent = chef.name;
-      chip.dataset.target = chef.slug;
-      chip.setAttribute('role','tab');
-      chipRail.appendChild(chip);
-
-      var tier = document.createElement('section');
-      tier.className = 'tier';
-      tier.id = chef.slug;
-      tier.style.setProperty('--tier-accent', 'var(--' + chef.accent + ')');
-
-      var head = document.createElement('div');
-      head.className = 'tier-head';
-      head.innerHTML = '<h2>' + chef.name + '</h2><span class="tier-count">' + chef.items.length + (chef.items.length===1?' dish':' dishes') + '</span>';
-      tier.appendChild(head);
-
-      chef.items.forEach(function(item){
-        totalDishes++;
-        minPrice = Math.min(minPrice, item.price);
-        maxPrice = Math.max(maxPrice, item.price);
-
-        var row = document.createElement('div');
-        row.className = 'dish';
-        row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
-        row.dataset.price = item.price;
-        row.dataset.available = item.available;
-        row.dataset.originalIndex = totalDishes;
-
-        var lowStock = item.available <= 5;
-        row.innerHTML =
-          '<div class="dish-info">' +
-            '<div class="dish-desc">' + item.desc + '</div>' +
-            '<div class="dish-facts">' +
-              '<span class="price-tag">৳' + item.price + '</span>' +
-              '<span class="code-tag">Code ' + item.code + '</span>' +
-              '<span class="avail-tag ' + (lowStock ? 'avail-low' : 'avail-ok') + '">' + (lowStock ? 'Only ' + item.available + ' left' : item.available + ' available') + '</span>' +
-            '</div>' +
-          '</div>' +
-          '<button class="order-btn" type="button">Order</button>';
-
-        row.querySelector('.order-btn').addEventListener('click', function(){
-          openSheet(chef, item);
-        });
-
-        tier.appendChild(row);
-      });
-
-      menuList.appendChild(tier);
-    });
-
-    document.getElementById('statChefs').textContent = MENU_DATA.length;
-    document.getElementById('statDishes').textContent = totalDishes;
-    document.getElementById('statPrice').textContent = '৳' + minPrice + '–' + maxPrice;
-  } catch(e){ if (window.console) console.error('[Foosto] menu render failed:', e); }
-
-  /* ---------- Chip navigation + scroll-spy ---------- */
+  var menuLoading = document.getElementById('menuLoading');
+  var menuLoadError = document.getElementById('menuLoadError');
   var tiers = [];
-  try {
-    var chips = Array.prototype.slice.call(chipRail.children);
-    chips.forEach(function(chip){
-      chip.addEventListener('click', function(){
-        var target = document.getElementById(chip.dataset.target);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
 
-    /* Mouse users only have a vertical wheel; convert that into horizontal
-       scroll while the pointer is over the chip rail so every chef name is
-       reachable without a trackpad or touch swipe. */
-    chipRail.addEventListener('wheel', function(e){
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // already a horizontal gesture (trackpad) — let it through
-      e.preventDefault();
-      chipRail.scrollLeft += e.deltaY;
-    }, { passive: false });
-
-    tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
-    if ('IntersectionObserver' in window){
-      var spy = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          if (!entry.isIntersecting) return;
-          var chip = chipRail.querySelector('[data-target="' + entry.target.id + '"]');
-          if (!chip) return;
-          chips.forEach(function(c){ c.classList.remove('active'); });
-          chip.classList.add('active');
-          chip.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
-        });
-      }, { rootMargin: '-160px 0px -70% 0px' });
-      tiers.forEach(function(t){ spy.observe(t); });
-    }
-    if (chips[0]) chips[0].classList.add('active');
-  } catch(e){ if (window.console) console.error('[Foosto] chip nav failed:', e); }
-
-  /* ---------- Filter, sort & search (combined) ---------- */
   var searchInput = document.getElementById('searchInput');
   var emptyState = document.getElementById('emptyState');
   var sortSelect = document.getElementById('sortSelect');
@@ -805,128 +661,271 @@
   var availOnlyCheckbox = document.getElementById('availOnlyCheckbox');
   var resetFiltersBtn = document.getElementById('resetFiltersBtn');
   var filterResultCount = document.getElementById('filterResultCount');
-
-  try {
-  /* ---------- Collapsible toolbar ---------- */
   var toolbarSection = document.getElementById('toolbarSection');
   var toolbarToggle = document.getElementById('toolbarToggle');
-  var TOOLBAR_STATE_KEY = 'foosto-tiffin-toolbar-collapsed';
-  function setToolbarCollapsed(collapsed){
-    toolbarSection.classList.toggle('collapsed', collapsed);
-    toolbarToggle.setAttribute('aria-expanded', String(!collapsed));
-    try { localStorage.setItem(TOOLBAR_STATE_KEY, collapsed ? '1' : '0'); } catch(e){ /* storage unavailable, skip silently */ }
-  }
-  toolbarToggle.addEventListener('click', function(){
-    setToolbarCollapsed(!toolbarSection.classList.contains('collapsed'));
-  });
-  var startCollapsed = false;
-  try { startCollapsed = localStorage.getItem(TOOLBAR_STATE_KEY) === '1'; } catch(e){ /* storage unavailable, default open */ }
-  setToolbarCollapsed(startCollapsed);
 
-  var priceRangeUseful = isFinite(minPrice) && isFinite(maxPrice) && maxPrice > minPrice;
-  if (priceRangeUseful){
-    priceMinRange.min = priceMaxRange.min = minPrice;
-    priceMinRange.max = priceMaxRange.max = maxPrice;
-    priceMinRange.value = minPrice;
-    priceMaxRange.value = maxPrice;
-  } else {
-    priceRangeRow.style.display = 'none';
-  }
+  /* Toolbar collapse works immediately -- it doesn't need menu data. */
+  try {
+    var TOOLBAR_STATE_KEY = 'foosto-tiffin-toolbar-collapsed';
+    var setToolbarCollapsed = function(collapsed){
+      toolbarSection.classList.toggle('collapsed', collapsed);
+      toolbarToggle.setAttribute('aria-expanded', String(!collapsed));
+      try { localStorage.setItem(TOOLBAR_STATE_KEY, collapsed ? '1' : '0'); } catch(e){}
+    };
+    toolbarToggle.addEventListener('click', function(){
+      setToolbarCollapsed(!toolbarSection.classList.contains('collapsed'));
+    });
+    var startCollapsed = false;
+    try { startCollapsed = localStorage.getItem(TOOLBAR_STATE_KEY) === '1'; } catch(e){}
+    setToolbarCollapsed(startCollapsed);
+  } catch(e){ if (window.console) console.error('[Foosto] toolbar toggle failed:', e); }
 
-  function updateRangeUI(){
-    if (!priceRangeUseful) return;
-    var lo = Math.min(+priceMinRange.value, +priceMaxRange.value);
-    var hi = Math.max(+priceMinRange.value, +priceMaxRange.value);
-    priceMinLabel.textContent = '৳' + lo;
-    priceMaxLabel.textContent = '৳' + hi;
-    var span = maxPrice - minPrice;
-    rangeFill.style.left = ((lo - minPrice) / span * 100) + '%';
-    rangeFill.style.right = (100 - (hi - minPrice) / span * 100) + '%';
-  }
+  function renderMenuData(chefs){
+    var totalDishes = 0, minPrice = Infinity, maxPrice = -Infinity;
 
-  function applyFilters(){
-    var q = searchInput.value.trim().toLowerCase();
-    var lo = priceRangeUseful ? Math.min(+priceMinRange.value, +priceMaxRange.value) : -Infinity;
-    var hi = priceRangeUseful ? Math.max(+priceMinRange.value, +priceMaxRange.value) : Infinity;
-    var availOnly = availOnlyCheckbox.checked;
-    var anyVisible = false, visibleCount = 0;
+    try {
+      chefs.forEach(function(chef){ chef.slug = 'chef-' + slugify(chef.name); });
 
-    tiers.forEach(function(tier){
-      var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
-      var tierHasMatch = false;
-      rows.forEach(function(row){
-        var price = Number(row.dataset.price);
-        var available = Number(row.dataset.available);
-        var textMatch = !q || row.dataset.search.indexOf(q) !== -1;
-        var priceMatch = price >= lo && price <= hi;
-        var availMatch = !availOnly || available > 0;
-        var match = textMatch && priceMatch && availMatch;
-        row.style.display = match ? '' : 'none';
-        if (match){ tierHasMatch = true; visibleCount++; }
+      chefs.forEach(function(chef){
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip';
+        chip.textContent = chef.name;
+        chip.dataset.target = chef.slug;
+        chip.setAttribute('role','tab');
+        chipRail.appendChild(chip);
+
+        var tier = document.createElement('section');
+        tier.className = 'tier';
+        tier.id = chef.slug;
+        tier.style.setProperty('--tier-accent', 'var(--' + chef.accent + ')');
+
+        var head = document.createElement('div');
+        head.className = 'tier-head';
+        head.innerHTML = '<h2>' + chef.name + '</h2><span class="tier-count">' + chef.items.length + (chef.items.length===1?' dish':' dishes') + '</span>';
+        tier.appendChild(head);
+
+        chef.items.forEach(function(item){
+          totalDishes++;
+          minPrice = Math.min(minPrice, item.price);
+          maxPrice = Math.max(maxPrice, item.price);
+
+          var row = document.createElement('div');
+          row.className = 'dish';
+          row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
+          row.dataset.price = item.price;
+          row.dataset.available = item.available;
+          row.dataset.originalIndex = totalDishes;
+
+          var lowStock = item.available <= 5;
+          row.innerHTML =
+            '<div class="dish-info">' +
+              '<div class="dish-desc">' + item.desc + '</div>' +
+              '<div class="dish-facts">' +
+                '<span class="price-tag">৳' + item.price + '</span>' +
+                '<span class="code-tag">Code ' + item.code + '</span>' +
+                '<span class="avail-tag ' + (lowStock ? 'avail-low' : 'avail-ok') + '">' + (lowStock ? 'Only ' + item.available + ' left' : item.available + ' available') + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="order-btn" type="button">Order</button>';
+
+          row.querySelector('.order-btn').addEventListener('click', function(){
+            openSheet(chef, item);
+          });
+
+          tier.appendChild(row);
+        });
+
+        menuList.appendChild(tier);
       });
-      tier.style.display = tierHasMatch ? '' : 'none';
-      if (tierHasMatch) anyVisible = true;
-    });
 
-    emptyState.style.display = anyVisible ? 'none' : 'block';
-    filterResultCount.textContent = (visibleCount === totalDishes)
-      ? 'Showing all ' + totalDishes + ' dishes'
-      : 'Showing ' + visibleCount + ' of ' + totalDishes + ' dishes';
-  }
+      document.getElementById('statChefs').textContent = chefs.length;
+      document.getElementById('statDishes').textContent = totalDishes;
+      document.getElementById('statPrice').textContent = '৳' + minPrice + '–' + maxPrice;
+    } catch(e){ if (window.console) console.error('[Foosto] menu render failed:', e); }
 
-  function applySort(){
-    var mode = sortSelect.value;
-    tiers.forEach(function(tier){
-      var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
-      if (mode === 'price-asc'){
-        rows.sort(function(a, b){ return Number(a.dataset.price) - Number(b.dataset.price); });
-      } else if (mode === 'price-desc'){
-        rows.sort(function(a, b){ return Number(b.dataset.price) - Number(a.dataset.price); });
-      } else {
-        rows.sort(function(a, b){ return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex); });
+    try {
+      var chips = Array.prototype.slice.call(chipRail.children);
+      chips.forEach(function(chip){
+        chip.addEventListener('click', function(){
+          var target = document.getElementById(chip.dataset.target);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      /* Mouse users only have a vertical wheel; convert that into horizontal
+         scroll while the pointer is over the chip rail so every chef name is
+         reachable without a trackpad or touch swipe. */
+      chipRail.addEventListener('wheel', function(e){
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // already a horizontal gesture (trackpad) — let it through
+        e.preventDefault();
+        chipRail.scrollLeft += e.deltaY;
+      }, { passive: false });
+
+      tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
+      if ('IntersectionObserver' in window){
+        var spy = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if (!entry.isIntersecting) return;
+            var chip = chipRail.querySelector('[data-target="' + entry.target.id + '"]');
+            if (!chip) return;
+            chips.forEach(function(c){ c.classList.remove('active'); });
+            chip.classList.add('active');
+            chip.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+          });
+        }, { rootMargin: '-160px 0px -70% 0px' });
+        tiers.forEach(function(t){ spy.observe(t); });
       }
-      rows.forEach(function(row){ tier.appendChild(row); });
-    });
-  }
+      if (chips[0]) chips[0].classList.add('active');
+    } catch(e){ if (window.console) console.error('[Foosto] chip nav failed:', e); }
 
-  function resetAllFilters(){
-    searchInput.value = '';
-    if (priceRangeUseful){
-      priceMinRange.value = minPrice;
-      priceMaxRange.value = maxPrice;
-      updateRangeUI();
-    }
-    availOnlyCheckbox.checked = true;
-    sortSelect.value = 'default';
-    applySort();
-    applyFilters();
-  }
+    try {
+      var priceRangeUseful = isFinite(minPrice) && isFinite(maxPrice) && maxPrice > minPrice;
+      if (priceRangeUseful){
+        priceMinRange.min = priceMaxRange.min = minPrice;
+        priceMinRange.max = priceMaxRange.max = maxPrice;
+        priceMinRange.value = minPrice;
+        priceMaxRange.value = maxPrice;
+      } else {
+        priceRangeRow.style.display = 'none';
+      }
 
-  searchInput.addEventListener('input', applyFilters);
-  document.getElementById('clearSearchBtn').addEventListener('click', function(){
-    resetAllFilters();
-    searchInput.focus();
-  });
+      var updateRangeUI = function(){
+        if (!priceRangeUseful) return;
+        var lo = Math.min(+priceMinRange.value, +priceMaxRange.value);
+        var hi = Math.max(+priceMinRange.value, +priceMaxRange.value);
+        priceMinLabel.textContent = '৳' + lo;
+        priceMaxLabel.textContent = '৳' + hi;
+        var span = maxPrice - minPrice;
+        rangeFill.style.left = ((lo - minPrice) / span * 100) + '%';
+        rangeFill.style.right = (100 - (hi - minPrice) / span * 100) + '%';
+      };
 
-  if (priceRangeUseful){
-    priceMinRange.addEventListener('input', function(){
-      if (+priceMinRange.value > +priceMaxRange.value) priceMinRange.value = priceMaxRange.value;
+      var applyFilters = function(){
+        var q = searchInput.value.trim().toLowerCase();
+        var lo = priceRangeUseful ? Math.min(+priceMinRange.value, +priceMaxRange.value) : -Infinity;
+        var hi = priceRangeUseful ? Math.max(+priceMinRange.value, +priceMaxRange.value) : Infinity;
+        var availOnly = availOnlyCheckbox.checked;
+        var anyVisible = false, visibleCount = 0;
+
+        tiers.forEach(function(tier){
+          var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
+          var tierHasMatch = false;
+          rows.forEach(function(row){
+            var price = Number(row.dataset.price);
+            var available = Number(row.dataset.available);
+            var textMatch = !q || row.dataset.search.indexOf(q) !== -1;
+            var priceMatch = price >= lo && price <= hi;
+            var availMatch = !availOnly || available > 0;
+            var match = textMatch && priceMatch && availMatch;
+            row.style.display = match ? '' : 'none';
+            if (match){ tierHasMatch = true; visibleCount++; }
+          });
+          tier.style.display = tierHasMatch ? '' : 'none';
+          if (tierHasMatch) anyVisible = true;
+        });
+
+        emptyState.style.display = anyVisible ? 'none' : 'block';
+        filterResultCount.textContent = (visibleCount === totalDishes)
+          ? 'Showing all ' + totalDishes + ' dishes'
+          : 'Showing ' + visibleCount + ' of ' + totalDishes + ' dishes';
+      };
+
+      var applySort = function(){
+        var mode = sortSelect.value;
+        tiers.forEach(function(tier){
+          var rows = Array.prototype.slice.call(tier.querySelectorAll('.dish'));
+          if (mode === 'price-asc'){
+            rows.sort(function(a, b){ return Number(a.dataset.price) - Number(b.dataset.price); });
+          } else if (mode === 'price-desc'){
+            rows.sort(function(a, b){ return Number(b.dataset.price) - Number(a.dataset.price); });
+          } else {
+            rows.sort(function(a, b){ return Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex); });
+          }
+          rows.forEach(function(row){ tier.appendChild(row); });
+        });
+      };
+
+      var resetAllFilters = function(){
+        searchInput.value = '';
+        if (priceRangeUseful){
+          priceMinRange.value = minPrice;
+          priceMaxRange.value = maxPrice;
+          updateRangeUI();
+        }
+        availOnlyCheckbox.checked = true;
+        sortSelect.value = 'default';
+        applySort();
+        applyFilters();
+      };
+
+      searchInput.addEventListener('input', applyFilters);
+      document.getElementById('clearSearchBtn').addEventListener('click', function(){
+        resetAllFilters();
+        searchInput.focus();
+      });
+
+      if (priceRangeUseful){
+        priceMinRange.addEventListener('input', function(){
+          if (+priceMinRange.value > +priceMaxRange.value) priceMinRange.value = priceMaxRange.value;
+          updateRangeUI();
+          applyFilters();
+        });
+        priceMaxRange.addEventListener('input', function(){
+          if (+priceMaxRange.value < +priceMinRange.value) priceMaxRange.value = priceMinRange.value;
+          updateRangeUI();
+          applyFilters();
+        });
+      }
+      availOnlyCheckbox.addEventListener('change', applyFilters);
+      sortSelect.addEventListener('change', applySort);
+      resetFiltersBtn.addEventListener('click', resetAllFilters);
+
       updateRangeUI();
       applyFilters();
-    });
-    priceMaxRange.addEventListener('input', function(){
-      if (+priceMaxRange.value < +priceMinRange.value) priceMaxRange.value = priceMinRange.value;
-      updateRangeUI();
-      applyFilters();
-    });
+    } catch(e){ if (window.console) console.error('[Foosto] filter/sort toolbar failed:', e); }
   }
-  availOnlyCheckbox.addEventListener('change', applyFilters);
-  sortSelect.addEventListener('change', applySort);
-  resetFiltersBtn.addEventListener('click', resetAllFilters);
 
-  updateRangeUI();
-  applyFilters();
-  } catch(e){ if (window.console) console.error('[Foosto] filter/sort toolbar failed:', e); }
+  /* ---------- Load today's menu (same-origin fetch, no CORS issue) ---------- */
+  function showMenuLoadError(){
+    try { if (menuLoading) menuLoading.style.display = 'none'; } catch(e){}
+    try { if (menuLoadError) menuLoadError.style.display = 'block'; } catch(e){}
+  }
+  function loadMenu(){
+    try { if (menuLoadError) menuLoadError.style.display = 'none'; } catch(e){}
+    try { if (menuLoading) menuLoading.style.display = 'block'; } catch(e){}
+    fetch('./menu-data.json', { cache: 'no-store' })
+      .then(function(res){
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        if (!data || !Array.isArray(data.chefs) || data.chefs.length === 0){
+          throw new Error('menu-data.json has no chefs');
+        }
+        try { if (menuLoading) menuLoading.style.display = 'none'; } catch(e){}
+        renderMenuData(data.chefs);
+        try {
+          if (data.scrapedAt){
+            var d = new Date(data.scrapedAt);
+            var stamp = isNaN(d.getTime()) ? data.scrapedAt : d.toLocaleString('en-US', {
+              dateStyle: 'medium', timeStyle: 'short'
+            });
+            var scrapedNote = document.getElementById('scrapedAtNote');
+            if (scrapedNote) scrapedNote.textContent = 'Menu last refreshed ' + stamp + '.';
+          }
+        } catch(e){}
+      })
+      .catch(function(err){
+        if (window.console) console.error('[Foosto] could not load menu-data.json:', err);
+        showMenuLoadError();
+      });
+  }
+  try {
+    var retryBtn = document.getElementById('menuLoadRetryBtn');
+    if (retryBtn) retryBtn.addEventListener('click', loadMenu);
+  } catch(e){}
+  loadMenu();
 
   /* ---------- Back to top ---------- */
   try {
