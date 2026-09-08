@@ -432,7 +432,7 @@
       <div class="brand-row">
         <svg class="brand-mark" viewBox="0 0 48 48"><use href="#ic-tiffin"/></svg>
         <div>
-          <div class="brand-name">Foosto Tiffin</div>
+          <div class="brand-name">Foosto Lunch</div>
           <div class="brand-tagline">ঘরের রান্না, আপনার ডেস্কে</div>
         </div>
       </div>
@@ -656,6 +656,58 @@
   "use strict";
 
   /* ============================================================
+     Failsafe core — deliberately has zero dependencies on anything
+     defined later in this file. It must always work, so a bug in any
+     one feature below can never leave the visitor stuck looking at a
+     frozen, unscrollable page. Every section further down is wrapped
+     in its own try/catch too, so a failure in one (e.g. the price
+     slider) can't prevent another (e.g. the order sheet) from working.
+     ============================================================ */
+  var scrollLockY = 0;
+  var openSheet; // assigned further down; declared here since it's called from
+                 // an earlier, separate try block (the menu-render section) —
+                 // in strict mode a `function` declared inside a try block is
+                 // scoped to that block only, so this must be a plain var.
+  function lockBodyScroll(){
+    try {
+      scrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '-' + scrollLockY + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+    } catch(e){ /* if this fails the page just stays scrollable, never stuck */ }
+  }
+  function unlockBodyScroll(){
+    try {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollLockY);
+    } catch(e){ /* worst case the scroll position is off by a bit, never stuck */ }
+  }
+  function forceCloseAllModals(){
+    try {
+      var sheetEl = document.getElementById('sheet');
+      var profileEl = document.getElementById('profileSheet');
+      var scrimEl = document.getElementById('scrim');
+      if (sheetEl) sheetEl.classList.remove('show');
+      if (profileEl) profileEl.classList.remove('show');
+      if (scrimEl) scrimEl.classList.remove('show');
+    } catch(e){}
+    unlockBodyScroll();
+  }
+  try {
+    var failsafeScrim = document.getElementById('scrim');
+    if (failsafeScrim) failsafeScrim.addEventListener('click', forceCloseAllModals);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') forceCloseAllModals();
+    });
+  } catch(e){}
+
+  /* ============================================================
      Menu data — scraped from https://menu.foosto.com on 2026-09-08.
      Re-run scraper.py against the live site and paste its JSON
      output here (as MENU_DATA) to refresh for a new day's menu.
@@ -740,96 +792,101 @@
   var chipRail = document.getElementById('chipRail');
   var totalDishes = 0, minPrice = Infinity, maxPrice = -Infinity;
 
-  MENU_DATA.forEach(function(chef){
-    var chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'chip';
-    chip.textContent = chef.name;
-    chip.dataset.target = chef.slug;
-    chip.setAttribute('role','tab');
-    chipRail.appendChild(chip);
+  try {
+    MENU_DATA.forEach(function(chef){
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.textContent = chef.name;
+      chip.dataset.target = chef.slug;
+      chip.setAttribute('role','tab');
+      chipRail.appendChild(chip);
 
-    var tier = document.createElement('section');
-    tier.className = 'tier';
-    tier.id = chef.slug;
-    tier.style.setProperty('--tier-accent', 'var(--' + chef.accent + ')');
+      var tier = document.createElement('section');
+      tier.className = 'tier';
+      tier.id = chef.slug;
+      tier.style.setProperty('--tier-accent', 'var(--' + chef.accent + ')');
 
-    var head = document.createElement('div');
-    head.className = 'tier-head';
-    head.innerHTML = '<h2>' + chef.name + '</h2><span class="tier-count">' + chef.items.length + (chef.items.length===1?' dish':' dishes') + '</span>';
-    tier.appendChild(head);
+      var head = document.createElement('div');
+      head.className = 'tier-head';
+      head.innerHTML = '<h2>' + chef.name + '</h2><span class="tier-count">' + chef.items.length + (chef.items.length===1?' dish':' dishes') + '</span>';
+      tier.appendChild(head);
 
-    chef.items.forEach(function(item){
-      totalDishes++;
-      minPrice = Math.min(minPrice, item.price);
-      maxPrice = Math.max(maxPrice, item.price);
+      chef.items.forEach(function(item){
+        totalDishes++;
+        minPrice = Math.min(minPrice, item.price);
+        maxPrice = Math.max(maxPrice, item.price);
 
-      var row = document.createElement('div');
-      row.className = 'dish';
-      row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
-      row.dataset.price = item.price;
-      row.dataset.available = item.available;
-      row.dataset.originalIndex = totalDishes;
+        var row = document.createElement('div');
+        row.className = 'dish';
+        row.dataset.search = (chef.name + ' ' + item.desc).toLowerCase();
+        row.dataset.price = item.price;
+        row.dataset.available = item.available;
+        row.dataset.originalIndex = totalDishes;
 
-      var lowStock = item.available <= 5;
-      row.innerHTML =
-        '<div class="dish-info">' +
-          '<div class="dish-desc">' + item.desc + '</div>' +
-          '<div class="dish-facts">' +
-            '<span class="price-tag">৳' + item.price + '</span>' +
-            '<span class="code-tag">Code ' + item.code + '</span>' +
-            '<span class="avail-tag ' + (lowStock ? 'avail-low' : 'avail-ok') + '">' + (lowStock ? 'Only ' + item.available + ' left' : item.available + ' available') + '</span>' +
+        var lowStock = item.available <= 5;
+        row.innerHTML =
+          '<div class="dish-info">' +
+            '<div class="dish-desc">' + item.desc + '</div>' +
+            '<div class="dish-facts">' +
+              '<span class="price-tag">৳' + item.price + '</span>' +
+              '<span class="code-tag">Code ' + item.code + '</span>' +
+              '<span class="avail-tag ' + (lowStock ? 'avail-low' : 'avail-ok') + '">' + (lowStock ? 'Only ' + item.available + ' left' : item.available + ' available') + '</span>' +
+            '</div>' +
           '</div>' +
-        '</div>' +
-        '<button class="order-btn" type="button">Order</button>';
+          '<button class="order-btn" type="button">Order</button>';
 
-      row.querySelector('.order-btn').addEventListener('click', function(){
-        openSheet(chef, item);
+        row.querySelector('.order-btn').addEventListener('click', function(){
+          openSheet(chef, item);
+        });
+
+        tier.appendChild(row);
       });
 
-      tier.appendChild(row);
+      menuList.appendChild(tier);
     });
 
-    menuList.appendChild(tier);
-  });
-
-  document.getElementById('statChefs').textContent = MENU_DATA.length;
-  document.getElementById('statDishes').textContent = totalDishes;
-  document.getElementById('statPrice').textContent = '৳' + minPrice + '–' + maxPrice;
+    document.getElementById('statChefs').textContent = MENU_DATA.length;
+    document.getElementById('statDishes').textContent = totalDishes;
+    document.getElementById('statPrice').textContent = '৳' + minPrice + '–' + maxPrice;
+  } catch(e){ if (window.console) console.error('[Foosto] menu render failed:', e); }
 
   /* ---------- Chip navigation + scroll-spy ---------- */
-  var chips = Array.prototype.slice.call(chipRail.children);
-  chips.forEach(function(chip){
-    chip.addEventListener('click', function(){
-      var target = document.getElementById(chip.dataset.target);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
-
-  /* Mouse users only have a vertical wheel; convert that into horizontal
-     scroll while the pointer is over the chip rail so every chef name is
-     reachable without a trackpad or touch swipe. */
-  chipRail.addEventListener('wheel', function(e){
-    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // already a horizontal gesture (trackpad) — let it through
-    e.preventDefault();
-    chipRail.scrollLeft += e.deltaY;
-  }, { passive: false });
-
-  var tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
-  if ('IntersectionObserver' in window){
-    var spy = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if (!entry.isIntersecting) return;
-        var chip = chipRail.querySelector('[data-target="' + entry.target.id + '"]');
-        if (!chip) return;
-        chips.forEach(function(c){ c.classList.remove('active'); });
-        chip.classList.add('active');
-        chip.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+  var tiers = [];
+  try {
+    var chips = Array.prototype.slice.call(chipRail.children);
+    chips.forEach(function(chip){
+      chip.addEventListener('click', function(){
+        var target = document.getElementById(chip.dataset.target);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
-    }, { rootMargin: '-160px 0px -70% 0px' });
-    tiers.forEach(function(t){ spy.observe(t); });
-  }
-  if (chips[0]) chips[0].classList.add('active');
+    });
+
+    /* Mouse users only have a vertical wheel; convert that into horizontal
+       scroll while the pointer is over the chip rail so every chef name is
+       reachable without a trackpad or touch swipe. */
+    chipRail.addEventListener('wheel', function(e){
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // already a horizontal gesture (trackpad) — let it through
+      e.preventDefault();
+      chipRail.scrollLeft += e.deltaY;
+    }, { passive: false });
+
+    tiers = Array.prototype.slice.call(document.querySelectorAll('.tier'));
+    if ('IntersectionObserver' in window){
+      var spy = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (!entry.isIntersecting) return;
+          var chip = chipRail.querySelector('[data-target="' + entry.target.id + '"]');
+          if (!chip) return;
+          chips.forEach(function(c){ c.classList.remove('active'); });
+          chip.classList.add('active');
+          chip.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+        });
+      }, { rootMargin: '-160px 0px -70% 0px' });
+      tiers.forEach(function(t){ spy.observe(t); });
+    }
+    if (chips[0]) chips[0].classList.add('active');
+  } catch(e){ if (window.console) console.error('[Foosto] chip nav failed:', e); }
 
   /* ---------- Filter, sort & search (combined) ---------- */
   var searchInput = document.getElementById('searchInput');
@@ -845,6 +902,7 @@
   var resetFiltersBtn = document.getElementById('resetFiltersBtn');
   var filterResultCount = document.getElementById('filterResultCount');
 
+  try {
   /* ---------- Collapsible toolbar ---------- */
   var toolbarSection = document.getElementById('toolbarSection');
   var toolbarToggle = document.getElementById('toolbarToggle');
@@ -964,8 +1022,10 @@
 
   updateRangeUI();
   applyFilters();
+  } catch(e){ if (window.console) console.error('[Foosto] filter/sort toolbar failed:', e); }
 
   /* ---------- Back to top ---------- */
+  try {
   var topFab = document.getElementById('topFab');
   window.addEventListener('scroll', function(){
     topFab.classList.toggle('show', window.scrollY > 700);
@@ -973,41 +1033,19 @@
   topFab.addEventListener('click', function(){
     window.scrollTo({ top:0, behavior:'smooth' });
   });
+  } catch(e){ if (window.console) console.error('[Foosto] back-to-top failed:', e); }
 
+  /* ============================================================
+     Order sheet + saved delivery details. Everything from here to
+     the end of the file is wrapped in one try/catch: this is the
+     part that must never be taken down by a bug anywhere above it.
+     ============================================================ */
+  try {
   /* ---------- Order sheet ---------- */
   var sheet = document.getElementById('sheet');
   var scrim = document.getElementById('scrim');
   var orderForm = document.getElementById('orderForm');
   var currentItem = null, currentChef = null, qty = 1;
-
-  /* overflow:hidden on <body> is unreliable on iOS Safari and several
-     in-app browsers (Facebook's included) — it can fail to block
-     background scroll, or leave the page stuck after closing. Locking
-     via position:fixed + restoring scroll position is the technique
-     that actually works everywhere. */
-  var scrollLockY = 0, scrollLockCount = 0;
-  function lockBodyScroll(){
-    if (scrollLockCount === 0){
-      scrollLockY = window.scrollY || window.pageYOffset || 0;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + scrollLockY + 'px';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-    }
-    scrollLockCount++;
-  }
-  function unlockBodyScroll(){
-    scrollLockCount = Math.max(0, scrollLockCount - 1);
-    if (scrollLockCount === 0){
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollLockY);
-    }
-  }
 
   /* ---------- Saved delivery details: save once in this browser, reuse on every order ---------- */
   var STORAGE_KEY = 'foosto-tiffin-customer-details';
@@ -1047,22 +1085,24 @@
     }
   }
   function openProfileSheet(){
-    var saved = loadSavedDetails() || {};
-    document.getElementById('pPhone').value = saved.phone || '';
-    document.getElementById('pName').value = saved.name || '';
-    document.getElementById('pWhatsapp').value = saved.whatsapp || '';
-    document.getElementById('pEmail').value = saved.email || '';
-    document.getElementById('pAddress').value = saved.address || '';
-    scrim.classList.add('show');
-    profileSheet.classList.add('show');
+    try {
+      var saved = loadSavedDetails() || {};
+      document.getElementById('pPhone').value = saved.phone || '';
+      document.getElementById('pName').value = saved.name || '';
+      document.getElementById('pWhatsapp').value = saved.whatsapp || '';
+      document.getElementById('pEmail').value = saved.email || '';
+      document.getElementById('pAddress').value = saved.address || '';
+    } catch(e){}
+    try { scrim.classList.add('show'); } catch(e){}
+    try { profileSheet.classList.add('show'); } catch(e){}
     lockBodyScroll();
-    setTimeout(function(){ document.getElementById('pPhone').focus(); }, 260);
+    try { setTimeout(function(){ document.getElementById('pPhone').focus(); }, 260); } catch(e){}
   }
   function closeProfileSheet(){
-    profileSheet.classList.remove('show');
-    if (!sheet.classList.contains('show')){
-      scrim.classList.remove('show');
-    }
+    try { profileSheet.classList.remove('show'); } catch(e){}
+    try {
+      if (!sheet.classList.contains('show')) scrim.classList.remove('show');
+    } catch(e){}
     unlockBodyScroll();
   }
   profileBtn.addEventListener('click', openProfileSheet);
@@ -1121,52 +1161,51 @@
     document.getElementById('fPhone').focus();
   });
 
-  function openSheet(chef, item){
+  openSheet = function(chef, item){
     currentChef = chef; currentItem = item; qty = 1;
-    document.getElementById('sheetDesc').textContent = item.desc;
-    document.getElementById('sheetChef').textContent = 'Chef: ' + chef.name;
-    document.getElementById('sheetCode').textContent = item.code;
-    document.getElementById('qtyValue').textContent = qty;
-    document.getElementById('confirmBanner').classList.remove('show');
-    document.getElementById('copyPanel').classList.remove('show');
-    document.getElementById('submitBtn').textContent = 'Copy details & continue to Foosto';
-    updateTotal();
+    try {
+      document.getElementById('sheetDesc').textContent = item.desc;
+      document.getElementById('sheetChef').textContent = 'Chef: ' + chef.name;
+      document.getElementById('sheetCode').textContent = item.code;
+      document.getElementById('qtyValue').textContent = qty;
+      document.getElementById('confirmBanner').classList.remove('show');
+      document.getElementById('copyPanel').classList.remove('show');
+      document.getElementById('submitBtn').textContent = 'Copy details & continue to Foosto';
+      updateTotal();
+    } catch(e){}
 
-    var saved = loadSavedDetails();
-    document.getElementById('fPhone').value = (saved && saved.phone) || '';
-    document.getElementById('fName').value = (saved && saved.name) || '';
-    document.getElementById('fWhatsapp').value = (saved && saved.whatsapp) || '';
-    document.getElementById('fEmail').value = (saved && saved.email) || '';
-    document.getElementById('fAddress').value = (saved && saved.address) || '';
+    var reviewMode = false;
+    try {
+      var saved = loadSavedDetails();
+      document.getElementById('fPhone').value = (saved && saved.phone) || '';
+      document.getElementById('fName').value = (saved && saved.name) || '';
+      document.getElementById('fWhatsapp').value = (saved && saved.whatsapp) || '';
+      document.getElementById('fEmail').value = (saved && saved.email) || '';
+      document.getElementById('fAddress').value = (saved && saved.address) || '';
 
-    var reviewMode = hasCompleteDetails(saved);
-    if (reviewMode) renderSavedCard(saved);
-    setReviewMode(reviewMode);
+      reviewMode = hasCompleteDetails(saved);
+      if (reviewMode) renderSavedCard(saved);
+      setReviewMode(reviewMode);
+    } catch(e){}
 
-    scrim.classList.add('show');
-    sheet.classList.add('show');
+    try { scrim.classList.add('show'); } catch(e){}
+    try { sheet.classList.add('show'); } catch(e){}
     lockBodyScroll();
     if (!reviewMode){
-      setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260);
+      try { setTimeout(function(){ document.getElementById('fPhone').focus(); }, 260); } catch(e){}
     }
   }
   function closeSheet(){
-    sheet.classList.remove('show');
-    if (!profileSheet.classList.contains('show')){
-      scrim.classList.remove('show');
-    }
+    try { sheet.classList.remove('show'); } catch(e){}
+    try {
+      if (!profileSheet.classList.contains('show')) scrim.classList.remove('show');
+    } catch(e){}
     unlockBodyScroll();
   }
   document.getElementById('sheetClose').addEventListener('click', closeSheet);
-  scrim.addEventListener('click', function(){
-    if (sheet.classList.contains('show')) closeSheet();
-    if (profileSheet.classList.contains('show')) closeProfileSheet();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key !== 'Escape') return;
-    if (sheet.classList.contains('show')) closeSheet();
-    if (profileSheet.classList.contains('show')) closeProfileSheet();
-  });
+  /* Background-tap and Escape are handled by the global failsafe at the
+     top of this script, so they keep working even if something in this
+     section throws. */
 
   function updateTotal(){
     document.getElementById('totalPrice').textContent = '৳' + (currentItem.price * qty);
@@ -1234,6 +1273,7 @@
     document.getElementById('submitBtn').textContent = 'Copy again';
     window.open(FOOSTO_ORDER_URL, '_blank', 'noopener');
   });
+  } catch(e){ if (window.console) console.error('[Foosto] order sheet / profile setup failed:', e); }
 
 })();
 </script>
