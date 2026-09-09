@@ -648,13 +648,17 @@ async function boot() {
   }
 }
 
-/* changedAt is when Foosto's menu last actually differed; checkedAt is only
-   when the Action last looked. The stamp people care about is the first one.
+/* checkedAt is when the Action last looked; changedAt is when Foosto's dishes
+   last actually differed. The label says "Last Refreshed", so it has to be the
+   first one -- and now that every cron tick commits, this advances every half
+   hour instead of freezing for a whole day whenever the kitchens repeat a menu.
+   Swap to `data.changedAt || data.checkedAt` if you would rather it report the
+   last genuine menu change, but then rename the label to match.
    Pinned to Dhaka and to 24h so it reads 20:49 for every visitor, rather than
    silently re-clocking itself to whatever timezone the browser happens to be
    in -- a Dhaka lunch menu labelled 9:49 AM would just be wrong. */
 function showFreshness(data) {
-  const t = new Date(data.changedAt || data.checkedAt);
+  const t = new Date(data.checkedAt || data.changedAt);
   if (isNaN(t.getTime())) return;
   $('freshness').textContent = t.toLocaleTimeString('en-GB',
     { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: REFRESH_TZ });
