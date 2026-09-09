@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
+<title>Preview — Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://menu.foosto.com">
@@ -60,8 +60,6 @@ img{max-width:100%;display:block}
 .meta-item{display:flex;align-items:center;gap:6px}
 .meta-item svg{width:14px;height:14px;flex:none;color:#E3AF3F}
 .meta-item strong{color:#FBF3DE;font-weight:600}
-.meta-item.urgent strong{color:#E3AF3F}
-.meta-item.shut svg{color:#C08D6F}
 
 /* ---------- Controls: the only thing that follows you down ---------- */
 .controls{background:var(--brand-dark);color:#F3E9D2}
@@ -126,6 +124,11 @@ img{max-width:100%;display:block}
 .chip:hover{background:rgba(255,255,255,.14)}
 .chip[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 .chip .n{opacity:.65;font-weight:500;margin-left:5px}
+/* An ingredient nobody is cooking today stays visible but inert: "গরু 0" is
+   itself the answer to "is there beef today?", which hiding the chip isn't. */
+.chip:disabled{opacity:.38;cursor:not-allowed}
+.chip:disabled:hover{background:rgba(255,255,255,.07)}
+.tag-chip{font-family:var(--display);font-size:.86rem}
 
 .fbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px 11px;margin-top:9px;
   font-size:.79rem;color:#D8C6A3}
@@ -168,7 +171,13 @@ img{max-width:100%;display:block}
 .name{font-size:1.01rem;font-weight:500;color:var(--ink);margin:0}
 .meta{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:7px;font-size:.82rem;
   color:var(--ink-soft);align-items:center}
-.price{font-weight:600;color:var(--ink)}
+/* Price gets its own line directly under the dish name rather than sharing the
+   small meta row, where it read as one more grey chip among four. */
+.price-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;
+  margin-top:8px;font-size:.82rem}
+.price{font-family:var(--display);font-size:1.18rem;font-weight:700;line-height:1.25;
+  color:var(--gold);background:var(--gold-bg);border:1px solid var(--border);
+  padding:1px 11px;border-radius:8px;font-variant-numeric:tabular-nums}
 .chef-tag{font-weight:600;color:var(--ink-soft)}
 .code-tag{font-variant-numeric:tabular-nums;background:var(--bg-soft);border:1px solid var(--border);
   padding:1px 7px;border-radius:5px;color:var(--ink-soft)}
@@ -176,8 +185,12 @@ img{max-width:100%;display:block}
 .tag.ok{background:var(--green-bg);color:var(--green)}
 .tag.low{background:var(--brick-bg);color:var(--brick)}
 .tag.sold{background:var(--brick-bg);color:var(--brick)}
-.order{flex:none;align-self:center;background:var(--gold);color:#2A1B06;border:none;
+/* Available dishes render this as an <a> so the link can be middle-clicked,
+   long-pressed or copied; sold-out ones stay a disabled <button>. */
+.order{flex:none;align-self:center;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--gold);color:#2A1B06;border:none;text-decoration:none;
   border-radius:999px;padding:9px 18px;font-size:.9rem;font-weight:700;
+  font-family:inherit;line-height:1.4;white-space:nowrap;cursor:pointer;
   transition:transform .12s ease,filter .12s ease}
 .order:hover{filter:brightness(1.06)}
 .order:active{transform:scale(.97)}
@@ -213,57 +226,13 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
 .top-fab.show{opacity:1;pointer-events:auto}
 .top-fab svg{width:18px;height:18px}
 
-/* ---------- Order sheet ---------- */
-.scrim{position:fixed;inset:0;background:rgba(20,13,7,.5);z-index:40;
-  display:flex;align-items:flex-end;justify-content:center}
-@media(min-width:600px){.scrim{align-items:center;padding:24px}}
-.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:470px;max-height:92vh;
-  overflow:auto;border-radius:20px 20px 0 0;padding:22px}
-@media(min-width:600px){.sheet{border-radius:20px}}
-@media(prefers-reduced-motion:no-preference){.sheet{animation:rise .2s ease-out}
-  @keyframes rise{from{transform:translateY(16px);opacity:0}}}
-.shead{display:flex;gap:13px;margin-bottom:18px}
-.shead h2{font-size:1.1rem;font-weight:700;margin-bottom:3px}
-.shead .dish{font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin:0}
-.f{margin-bottom:13px}
-.f label{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ink-soft);margin-bottom:5px}
-.f label svg{width:14px;height:14px;color:var(--gold)}
-.f input,.f textarea,.f select{width:100%;background:var(--bg);color:inherit;
-  border:1px solid var(--border);border-radius:10px;padding:9px 11px;font:inherit;font-size:.95rem}
-.f textarea{resize:vertical;min-height:64px}
-.f input:read-only{background:var(--bg-soft);color:var(--ink-soft)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.submit{width:100%;height:48px;border:0;border-radius:999px;background:var(--gold);
-  color:#2A1B06;font-weight:700;font-size:.98rem;margin-top:6px}
-.submit:disabled{opacity:.6;cursor:wait}
-.sheet-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px}
-.linkbtn{background:none;border:0;padding:0;color:var(--gold);font-size:.85rem;font-weight:600;
-  text-decoration:underline;text-underline-offset:3px}
-.linkbtn[hidden]{display:none}
-.result{margin-top:14px;padding:12px 13px;border-radius:11px;font-size:.88rem;line-height:1.55;border:1px solid}
-.result.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
-.result.bad{border-color:var(--brick);background:var(--brick-bg);color:var(--brick)}
-.result.info{border-color:var(--border);background:var(--bg-soft);color:var(--ink-soft)}
-.result a{color:inherit;font-weight:600}
 </style>
 </head>
 <body>
 
-<!-- ========================================================================
-     ORDER SUBMISSION CONFIG  —  READ THIS BEFORE DEPLOYING
-     ========================================================================
-     admin.foosto.com has NO HTTPS (port 443 refuses connections). GitHub Pages
-     serves over HTTPS. Browsers block HTTPS -> HTTP requests as mixed content
-     before CORS is even evaluated, so this page cannot POST to Foosto directly.
-
-     Set ORDER.endpoint to an HTTPS proxy (see worker.js) and in-app ordering
-     starts working. Leave it empty and the sheet degrades honestly: it collects
-     the details, saves them, and hands off to Foosto's own form.
-
-     ORDER.fields maps this app's inputs to Foosto's form input names. The names
-     below are PLACEHOLDERS. Submit http://admin.foosto.com/order/create/ once
-     with DevTools' Network tab open and copy the real payload keys in.
-     ==================================================================== -->
+<!-- Ordering is a straight hand-off: the Order button links out to Foosto's own
+     create-order page. Nothing is collected or POSTed from here, which is what
+     lets this stay a static page with no proxy in front of it. -->
 
 <svg style="display:none" aria-hidden="true">
   <symbol id="ic-tiffin" viewBox="0 0 48 48">
@@ -273,18 +242,9 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
     <rect x="10.5" y="27" width="27" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
     <rect x="9" y="37.5" width="30" height="4.5" rx="2" fill="currentColor" opacity=".9"/>
   </symbol>
-  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3.2 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-  <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.6" r="2.4" fill="currentColor"/></symbol>
   <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-4.6-4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="ic-up" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1-4 4.2-6 7-6s6 2 7 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
-  <symbol id="ic-phone" viewBox="0 0 24 24"><path d="M7 4h2.2l1 4-2 1.6a11 11 0 0 0 5.2 5.2l1.6-2 4 1v2.2c0 1-.9 1.8-1.9 1.6C10.6 16.9 7.1 13.4 6.4 7.9 6.2 6.9 6 6 7 4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
-  <symbol id="ic-whatsapp" viewBox="0 0 24 24"><path d="M7 17.4 4.6 20l.9-3.2A7.9 7.9 0 1 1 12 20a8 8 0 0 1-5-1.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-  <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 7 12 13l7.5-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
-  <symbol id="ic-pin-s" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="9.6" r="2.2" fill="currentColor"/></symbol>
-  <symbol id="ic-hash" viewBox="0 0 24 24"><path d="M9 4 7 20M17 4l-2 16M4.5 9h15M3.5 15h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-  <symbol id="ic-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
 </svg>
 
 <header class="masthead" role="banner">
@@ -298,16 +258,9 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
     </div>
 
     <div class="meta-row">
-      <span class="meta-item" id="cutoffItem">
-        <svg viewBox="0 0 24 24"><use href="#ic-clock"/></svg><span id="cutoffText">&nbsp;</span>
-      </span>
-      <span class="meta-item">
-        <svg viewBox="0 0 24 24"><use href="#ic-pin"/></svg>
-        Gulshan · Banani · Tejgaon · Mohakhali · Badda
-      </span>
       <span class="meta-item" id="freshItem" hidden>
-        <svg viewBox="0 0 24 24"><use href="#ic-refresh"/></svg>
-        Menu changed <strong id="freshness"></strong><span id="freshNote"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-refresh"/></svg>
+        Menu Last Refreshed at <strong id="freshness"></strong>
       </span>
     </div>
   </div>
@@ -350,6 +303,10 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
         <button class="group-toggle" id="groupBtn" aria-pressed="true">Grouped by chef</button>
       </div>
       <div class="field rail-field">
+        <span>Contains</span>
+        <div class="chip-rail" id="tagRail" aria-label="Filter by ingredient"></div>
+      </div>
+      <div class="field rail-field">
         <span>Chefs</span>
         <div class="chip-rail" id="chipRail" aria-label="Filter by chef"></div>
       </div>
@@ -379,28 +336,238 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
 </button>
 
 <script>
-/* ===================================================================== */
-const ORDER = {
-  endpoint: '',                                    // e.g. 'https://foosto-order.you.workers.dev'
-  encoding: 'form',                                // 'form' (urlencoded) or 'json'
-  fallbackUrl: 'http://admin.foosto.com/order/create/',
-  fields: {                                        // our key  ->  Foosto's input name
-    menuCode: 'menu_code',
-    quantity: 'quantity',
-    name:     'customer_name',
-    phone:    'phone',
-    whatsapp: 'whatsapp_phone',
-    email:    'email',
-    address:  'address',
-  },
+// Generated by scripts/scrape-menu.mjs. Do not edit by hand.
+window.FOOSTO_MENU = {
+  "source": "https://menu.foosto.com/",
+  "changedAt": "2026-09-09T14:49:57.180Z",
+  "checkedAt": "2026-09-09T14:49:57.180Z",
+  "count": 19,
+  "items": [
+    {
+      "code": "62230",
+      "name": "রুই মাছ টমেটো আলু দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
+      "chef": "Soneka Begum",
+      "price": 180,
+      "available": 9,
+      "images": []
+    },
+    {
+      "code": "62231",
+      "name": "সোনালি মুরগি আলু দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
+      "chef": "Soneka Begum",
+      "price": 192,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "64253",
+      "name": "শিং মাছ টমেটো দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
+      "chef": "Soneka Begum",
+      "price": 171,
+      "available": 9,
+      "images": []
+    },
+    {
+      "code": "68606",
+      "name": "উত্তর বঙ্গের বিখ্যাত ডিম তেলানি,চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত, সালাত",
+      "chef": "Masuma Khatun",
+      "price": 161,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "68750",
+      "name": "সোনালি মুরগি আলু দিয়ে ঝোল, চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত,সালাদ",
+      "chef": "Masuma Khatun",
+      "price": 192,
+      "available": 9,
+      "images": []
+    },
+    {
+      "code": "70486",
+      "name": "রুই মাছের কোপ্তা কারি , চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত,সালাদ",
+      "chef": "Masuma Khatun",
+      "price": 187,
+      "available": 7,
+      "images": []
+    },
+    {
+      "code": "69387",
+      "name": "সোনালী মুরগী কষা ঝাল ভুনা আলু দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
+      "chef": "Selina Akhter",
+      "price": 191,
+      "available": 15,
+      "images": []
+    },
+    {
+      "code": "69409",
+      "name": "কৈ মাছ ঝোল ভুনা টমেটো দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
+      "chef": "Selina Akhter",
+      "price": 185,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "70830",
+      "name": "চিংড়ি মাছের ভুনা ৪/৫-পিচ টমেটো দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
+      "chef": "Selina Akhter",
+      "price": 200,
+      "available": 12,
+      "images": []
+    },
+    {
+      "code": "69520",
+      "name": "ডিম ভাজা পিঁয়াজ কাঁচামরিচ দিয়ে, আলুর ভর্তা,ঘন ডাল, নাজির চাল এর ভাত",
+      "chef": "Tanzima Akther",
+      "price": 161,
+      "available": 5,
+      "images": []
+    },
+    {
+      "code": "69860",
+      "name": "আস্ত ডিম ভুনা,,ডাল, আলুর ভর্তা, নাজির চাল।",
+      "chef": "Tanzima Akther",
+      "price": 161,
+      "available": 6,
+      "images": []
+    },
+    {
+      "code": "70802",
+      "name": "সোনালী মুরগী মাংস ঝাল ভুনা , মজাম্মেল মিনিকেট চালের ভাত,লাউ দিয়ে ডাল , ভর্তা , বেগুন ভাজা, সালাত।",
+      "chef": "Sultana Razia",
+      "price": 192,
+      "available": 15,
+      "images": []
+    },
+    {
+      "code": "70807",
+      "name": "সরিষার তেল দুই রকমের ডাল দিয়ে সোনা মশরী চাউলের মাখা মাখা খিচুড়ি, সোনালী মুরগী মাংস ঝাল ভুনা,বেগুন ভাজা, আচার, সালাত",
+      "chef": "Sultana Razia",
+      "price": 224,
+      "available": 9,
+      "images": []
+    },
+    {
+      "code": "71222",
+      "name": "সোনালি মুরগি ভুনা,,,করল্লা ভাজি,,,সাদা সবজি,,,এবং ভাত।",
+      "chef": "Amena",
+      "price": 192,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "71223",
+      "name": "সাদা পোলাও,,,সোনালি মুরগি ভুনা,,,সাদা সবজি,,,এবং সালাদ।",
+      "chef": "Amena",
+      "price": 218,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "71224",
+      "name": "আটার রুটি (৪)পিস,,,সোনালি মুরগি ভুনা,,,সাদা সবজি।",
+      "chef": "Amena",
+      "price": 189,
+      "available": 10,
+      "images": []
+    },
+    {
+      "code": "71225",
+      "name": "কাতল মাছ ভুনা ডাল ভুনা বেগুন ভর্তা ভাত সালাত",
+      "chef": "Samanta",
+      "price": 176,
+      "available": 7,
+      "images": []
+    },
+    {
+      "code": "71226",
+      "name": "আলু দিয়ে ডিম কারি ডাল ভুনা বেগুন ভর্তা ভাত সালাত",
+      "chef": "Samanta",
+      "price": 155,
+      "available": 7,
+      "images": []
+    },
+    {
+      "code": "71227",
+      "name": "খুদের ভাত আলু ভর্তা বেগুন ভর্তা শুঁটকি ভর্তা ডাল ভর্তা চিংড়ি মাছের বড়া সা",
+      "chef": "Samanta",
+      "price": 171,
+      "available": 8,
+      "images": [
+        "static-site/img/location.png",
+        "static-site/img/icon-03.png",
+        "static-site/img/way.png",
+        "static-site/img/app-phn-logo.png",
+        "static-site/img/phn.png"
+      ]
+    }
+  ]
 };
+</script>
+
+<script>
+/* ===================================================================== */
+// Where the Order button sends you. admin.foosto.com serves HTTP only, and
+// this page is HTTPS on GitHub Pages -- fine here, because a top-level
+// navigation is not mixed content the way a fetch() or an <img> would be.
+const ORDER_URL    = 'http://admin.foosto.com/create/';
 const MENU_FILE    = 'menu.js';
 const LOAD_TIMEOUT = 15000;
-const CUTOFF       = { hour: 10, minute: 20 };   // Dhaka local; UTC+6, no DST
-const STORE_KEY    = 'foosto.customer.v1';
+const REFRESH_TZ   = 'Asia/Dhaka';               // menu times are Dhaka times, wherever you read this
 // Foosto stocks roughly 4-14 portions per dish, so a "3 or fewer" warning
 // would almost never fire. 5 flags genuinely scarce dishes. Tune to taste.
 const LOW_STOCK    = 5;
+
+/* Ingredient filter -------------------------------------------------------
+   Dish names are free text typed by each kitchen, so this matches on spelling
+   variants rather than an ingredient field that does not exist upstream:
+   মুরগি/মুরগী, সরিষা/সরষে, and so on. Named species are listed for মাছ
+   because plenty of dishes say "কৈ" or "শুঁটকি" without ever saying "মাছ".
+
+   `strip` runs before `match`: চিংড়ি is its own filter, and every occurrence
+   of it in this menu is literally spelled "চিংড়ি মাছ", so without stripping
+   that phrase first a shrimp-only dish would answer to the fish filter too. */
+const TAGS = [
+  { id: 'goru',     label: '\u0997\u09B0\u09C1',
+    match: '\u0997\u09B0\u09C1|\u0997\u09CB\u09B0\u09C1|\u09AC\u09BF\u09AB|beef' },
+  { id: 'mach',     label: '\u09AE\u09BE\u099B',
+    strip: '\u099A\u09BF\u0982\u09DC\u09BF\\s*(\u09AE\u09BE\u099B(\u09C7\u09B0|\u09B0)?)?',
+    match: '\u09AE\u09BE\u099B|\u09B0\u09C1\u0987|\u0995\u09BE\u09A4\u09B2|\u0987\u09B2\u09BF\u09B6|\u09B6\u09BF\u0982|\u09AE\u09BE\u0997\u09C1\u09B0|\u0995\u0995\u09C8|\u09AA\u09BE\u0999\u09CD\u0997\u09BE|\u09A4\u09C7\u09B2\u09BE\u09AA\u09BF\u09DF\u09BE|\u09AA\u09BE\u09AC\u09A6\u09BE|\u099F\u09C7\u0982\u09B0\u09BE|\u099F\u09BE\u0995\u09BF|\u09AC\u09CB\u09DF\u09BE\u09B2|\u099A\u09BF\u09A4\u09B2|\u09AE\u09C3\u0997\u09C7\u09B2|\u09AA\u09C1\u0981\u099F\u09BF|\u0995\u09CB\u09B0\u09BE\u09B2|\u09B0\u09C2\u09AA\u099A\u09BE\u0981\u09A6\u09BE|\u09B2\u0987\u099F\u09CD\u099F\u09BE|\u09B6\u09C1\u0981\u099F\u0995\u09BF|\u09B6\u09C1\u099F\u0995\u09BF' },
+  { id: 'murgi',    label: '\u09AE\u09C1\u09B0\u0997\u09BF',
+    match: '\u09AE\u09C1\u09B0\u0997\u09BF|\u09AE\u09C1\u09B0\u0997\u09C0|\u09AE\u09CB\u09B0\u0997|\u099A\u09BF\u0995\u09C7\u09A8|chicken' },
+  { id: 'dim',      label: '\u09A1\u09BF\u09AE',      match: '\u09A1\u09BF\u09AE' },
+  { id: 'chingri',  label: '\u099A\u09BF\u0982\u09DC\u09BF',
+    match: '\u099A\u09BF\u0982\u09DC\u09BF|\u099A\u09BF\u0982\u09DC\u09C0' },
+  { id: 'shak',     label: '\u09B6\u09BE\u0995',      match: '\u09B6\u09BE\u0995' },
+  { id: 'dal',      label: '\u09A1\u09BE\u09B2',      match: '\u09A1\u09BE\u09B2' },
+  { id: 'polao',    label: '\u09AA\u09CB\u09B2\u09BE\u0993',
+    match: '\u09AA\u09CB\u09B2\u09BE\u0993|\u09AA\u09CB\u09B2\u09BE\u0989|\u09AA\u09C1\u09B2\u09BE\u0993' },
+  { id: 'shorisha', label: '\u09B8\u09B0\u09BF\u09B7\u09BE',
+    match: '\u09B8\u09B0\u09BF\u09B7\u09BE|\u09B6\u09B0\u09BF\u09B7\u09BE|\u09B8\u09B0\u09B7\u09C7' },
+];
+const TAG_LABEL = new Map(TAGS.map((t) => [t.id, t.label]));
+
+/* Kitchens type on different keyboards, and this menu proves it: চিংড়ি appears
+   four times as U+09DC and four times as U+09A1 U+09BC (ড + nukta). They render
+   identically and compare unequal, so a plain regex silently tagged half the
+   shrimp dishes. NFC folds both to one form -- on both sides, patterns included,
+   because the escapes above are only one of the two spellings themselves. */
+const norm = (s) => s.normalize('NFC');
+for (const t of TAGS) {
+  t.re = new RegExp(norm(t.match), 'i');
+  if (t.strip) t.stripRe = new RegExp(norm(t.strip), 'g');
+}
+
+// Computed once per item at load, not per keystroke: nine regexes across every
+// dish on every render would be the slowest thing on the page.
+function tagsOf(name) {
+  const text = norm(name);
+  const out = new Set();
+  for (const t of TAGS) {
+    if (t.re.test(t.stripRe ? text.replace(t.stripRe, ' ') : text)) out.add(t.id);
+  }
+  return out;
+}
 /* ===================================================================== */
 
 const $ = (id) => document.getElementById(id);
@@ -409,42 +576,13 @@ const taka = (n) => '\u09F3' + (Number.isInteger(n) ? n : n.toFixed(2));
 const range = (a, b) => a === b ? taka(a) : taka(a) + '\u2013' + (Number.isInteger(b) ? b : b.toFixed(2));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-const icon = (id) => '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#' + id + '"/></svg>';
-
-const store = {
-  read() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; } },
-  write(v) { try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); return true; } catch { return false; } },
-  clear() { try { localStorage.removeItem(STORE_KEY); } catch {} },
-};
-
-/* --- Cutoff status ------------------------------------------------------
-   Two states, and the closed one has to be useful rather than just a dead
-   end: it says what happens next instead of only announcing the door shut. */
-function tickClock() {
-  const DHAKA = 6 * 3600e3;                       // UTC+6, no daylight saving
-  const now = Date.now();
-  const d = new Date(now + DHAKA);
-  const cutoff = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
-                          CUTOFF.hour, CUTOFF.minute) - DHAKA;
-  const left = cutoff - now;
-  const item = $('cutoffItem'), text = $('cutoffText');
-
-  if (left <= 0) {
-    item.className = 'meta-item shut';
-    text.innerHTML = 'Kitchens closed for today \u00b7 <strong>tomorrow\u2019s menu arrives in the morning</strong>';
-    return;
-  }
-  const h = Math.floor(left / 3600e3), m = Math.floor(left / 60e3) % 60, s = Math.floor(left / 1e3) % 60;
-  const clock = (h ? h + 'h ' : '') + m + 'm ' + String(s).padStart(2, '0') + 's';
-  item.className = 'meta-item' + (left < 3600e3 ? ' urgent' : '');
-  text.innerHTML = 'Order within <strong>' + clock + '</strong>';
-}
 
 /* --- Loading menu.js ---------------------------------------------------- */
 /* Same-origin, assigns window.FOOSTO_MENU. A <script> tag rather than fetch()
    so the page also works from file:// while editing locally. The timestamp
    defeats caching, so every load gets whatever the Action last committed. */
 function loadMenu() {
+  if (window.FOOSTO_MENU) return Promise.resolve(window.FOOSTO_MENU);  // preview build
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
     const done = (fn, arg) => { clearTimeout(timer); s.remove(); fn(arg); };
@@ -460,7 +598,7 @@ function loadMenu() {
 
 /* --- State -------------------------------------------------------------- */
 const state = { items: [], bounds: [0, 0], q: '', sort: 'price-asc',
-                min: 0, max: 0, picked: new Set(), grouped: true };
+                min: 0, max: 0, picked: new Set(), tags: new Set(), grouped: true };
 
 /* Sorting answers two questions once dishes are grouped: how to order dishes
    inside a chef, and how to order the chefs. "Cheapest first" puts the chef
@@ -478,11 +616,15 @@ const GROUP_SORT = {
   'chef-asc':   (A, B) => A.chef.localeCompare(B.chef),
 };
 
+/* Picking মুরগি and ডিম means "either", matching how the chef rail already
+   behaves. Across groups it is AND: chef AND ingredient AND price. */
 function filtered() {
   const q = state.q.trim().toLowerCase();
+  const tags = [...state.tags];
   return state.items.filter((it) =>
     it.price >= state.min && it.price <= state.max &&
     (state.picked.size === 0 || state.picked.has(it.chef)) &&
+    (tags.length === 0 || tags.some((t) => it.tags.has(t))) &&
     (q === '' || it.name.toLowerCase().includes(q)
               || it.chef.toLowerCase().includes(q)
               || it.code.toLowerCase().includes(q)));
@@ -515,20 +657,26 @@ function dishHTML(it) {
     ? '<div class="thumb"><img src="' + esc(it.images[0]) + '" alt="" loading="lazy" '
       + 'decoding="async" onerror="this.parentNode.classList.add(\'none\');this.remove()"></div>'
     : '<div class="thumb none"></div>';
+  // Price sits on its own line right under the name so it is never something
+  // you have to hunt for in the middle of the grey meta row.
   return '<article class="item' + (out ? ' out' : '') + '">'
     + photo
     + '<div class="dish-info">'
     +   '<h3 class="name" lang="bn">' + esc(it.name) + '</h3>'
+    +   '<div class="price-row">'
+    +     '<span class="price">' + taka(it.price) + '</span>' + tag
+    +   '</div>'
     +   '<div class="meta">'
     +     (state.grouped ? '' : '<span class="chef-tag">' + esc(it.chef) + '</span>')
-    +     '<span class="price">' + taka(it.price) + '</span>'
-    +     tag
     +     '<span class="code-tag">#' + esc(it.code) + '</span>'
     +   '</div>'
     + '</div>'
-    + '<button class="order" data-code="' + esc(it.code) + '"' + (out ? ' disabled' : '')
-    + ' aria-label="Order ' + esc(it.name.slice(0, 40)) + '">'
-    + (out ? 'Sold out' : 'Order') + '</button></article>';
+    + (out
+        ? '<button class="order" disabled>Sold out</button>'
+        : '<a class="order" href="' + ORDER_URL + '" target="_blank" rel="noopener"'
+          + ' aria-label="Order ' + esc(it.name.slice(0, 40)) + ' on Foosto, menu code '
+          + esc(it.code) + '">Order</a>')
+    + '</article>';
 }
 
 const fchip = (kind, val, label) =>
@@ -540,6 +688,7 @@ function renderFilterChips() {
   const [lo, hi] = state.bounds;
   const bits = [];
   if (state.q.trim()) bits.push(fchip('search', '', 'Search: ' + state.q.trim()));
+  for (const t of state.tags) bits.push(fchip('tag', t, TAG_LABEL.get(t)));
   for (const c of state.picked) bits.push(fchip('chef', c, c));
   if (state.min > lo || state.max < hi) bits.push(fchip('price', '', range(state.min, state.max)));
   $('fchips').innerHTML = bits.join('');
@@ -592,6 +741,9 @@ function syncChips() {
   for (const b of $('chipRail').querySelectorAll('.chip')) {
     b.setAttribute('aria-pressed', String(state.picked.has(b.dataset.chef)));
   }
+  for (const b of $('tagRail').querySelectorAll('.chip')) {
+    b.setAttribute('aria-pressed', String(state.tags.has(b.dataset.tag)));
+  }
 }
 
 function buildFilters() {
@@ -599,10 +751,21 @@ function buildFilters() {
   const lo = Math.floor(Math.min(...prices)), hi = Math.ceil(Math.max(...prices));
   state.bounds = [lo, hi]; state.min = lo; state.max = hi;
   state.picked.clear();
+  state.tags.clear();
 
   for (const el of [$('pmin'), $('pmax')]) { el.min = lo; el.max = hi; el.step = 1; }
   $('pmin').value = lo; $('pmax').value = hi;
   syncSlider();
+
+  for (const it of state.items) it.tags = tagsOf(it.name);
+  // Fixed order, so the rail doesn't reshuffle under your thumb between
+  // refreshes. Chips for ingredients nobody is cooking today render disabled.
+  $('tagRail').innerHTML = TAGS.map((t) => {
+    const n = state.items.reduce((sum, it) => sum + (it.tags.has(t.id) ? 1 : 0), 0);
+    return '<button class="chip tag-chip" data-tag="' + t.id + '" aria-pressed="false"'
+      + (n ? '' : ' disabled') + ' lang="bn">'
+      + esc(t.label) + '<span class="n">' + n + '</span></button>';
+  }).join('');
 
   const counts = new Map();
   for (const it of state.items) counts.set(it.chef, (counts.get(it.chef) || 0) + 1);
@@ -610,135 +773,6 @@ function buildFilters() {
   $('chipRail').innerHTML = [...counts.keys()].sort((a, b) => a.localeCompare(b)).map((c) =>
     '<button class="chip" data-chef="' + esc(c) + '" aria-pressed="false">'
     + esc(c) + '<span class="n">' + counts.get(c) + '</span></button>').join('');
-}
-
-/* --- Order sheet -------------------------------------------------------- */
-let lastFocused = null;
-
-function openSheet(item) {
-  lastFocused = document.activeElement;
-  const saved = store.read() || {};
-  const qtyMax = Math.min(50, Math.max(1, item.available));
-  const configured = Boolean(ORDER.endpoint);
-  const photo = item.images && item.images.length
-    ? '<div class="thumb"><img src="' + esc(item.images[0]) + '" alt="" '
-      + 'onerror="this.parentNode.classList.add(\'none\');this.remove()"></div>'
-    : '<div class="thumb none"></div>';
-
-  const scrim = document.createElement('div');
-  scrim.className = 'scrim';
-  scrim.innerHTML =
-    '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">'
-    + '<div class="shead">' + photo + '<div><h2 id="mTitle">Order from ' + esc(item.chef) + '</h2>'
-    + '<p class="dish" lang="bn">' + esc(item.name) + '</p></div></div>'
-    + '<div class="two">'
-    +   '<div class="f"><label for="mCode">' + icon('ic-hash') + 'Menu code</label>'
-    +     '<input id="mCode" value="' + esc(item.code) + '" readonly></div>'
-    +   '<div class="f"><label for="mQty">' + icon('ic-bag') + 'Quantity</label><select id="mQty">'
-    +     Array.from({ length: qtyMax }, (_, i) => '<option>' + (i + 1) + '</option>').join('')
-    +   '</select></div>'
-    + '</div>'
-    + '<div class="f"><label for="mName">' + icon('ic-user') + 'Your name</label>'
-    +   '<input id="mName" autocomplete="name" value="' + esc(saved.name || '') + '"></div>'
-    + '<div class="two">'
-    +   '<div class="f"><label for="mPhone">' + icon('ic-phone') + 'Phone</label>'
-    +     '<input id="mPhone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(saved.phone || '') + '"></div>'
-    +   '<div class="f"><label for="mWa">' + icon('ic-whatsapp') + 'WhatsApp</label>'
-    +     '<input id="mWa" type="tel" inputmode="tel" value="' + esc(saved.whatsapp || '') + '"></div>'
-    + '</div>'
-    + '<div class="f"><label for="mEmail">' + icon('ic-mail') + 'Email</label>'
-    +   '<input id="mEmail" type="email" autocomplete="email" value="' + esc(saved.email || '') + '"></div>'
-    + '<div class="f"><label for="mAddr">' + icon('ic-pin-s') + 'Delivery address</label>'
-    +   '<textarea id="mAddr" autocomplete="street-address">' + esc(saved.address || '') + '</textarea></div>'
-    + '<button class="submit" id="mGo">' + (configured ? 'Place order' : 'Continue on Foosto') + '</button>'
-    + '<div class="sheet-foot">'
-    +   '<button class="linkbtn" id="mCancel">Cancel</button>'
-    +   '<button class="linkbtn" id="mForget"' + (Object.keys(saved).length ? '' : ' hidden') + '>Clear saved details</button>'
-    + '</div>'
-    + '<div id="mResult" aria-live="polite"></div></div>';
-
-  document.body.appendChild(scrim);
-  document.body.style.overflow = 'hidden';
-  $('mName').focus();
-
-  const close = () => {
-    scrim.remove();
-    document.body.style.overflow = '';
-    if (lastFocused) lastFocused.focus();
-  };
-  const values = () => ({
-    menuCode: item.code,
-    quantity: $('mQty').value,
-    name: $('mName').value.trim(),
-    phone: $('mPhone').value.trim(),
-    whatsapp: $('mWa').value.trim(),
-    email: $('mEmail').value.trim(),
-    address: $('mAddr').value.trim(),
-  });
-  const say = (cls, html) => { $('mResult').className = 'result ' + cls; $('mResult').innerHTML = html; };
-
-  scrim.addEventListener('click', (e) => { if (e.target === scrim) close(); });
-  $('mCancel').onclick = close;
-  scrim.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') close();
-    if (e.key !== 'Tab') return;
-    const f = scrim.querySelectorAll('button:not([hidden]),input,select,textarea');   // focus trap
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  });
-  $('mForget').onclick = () => {
-    store.clear();
-    for (const id of ['mName', 'mPhone', 'mWa', 'mEmail', 'mAddr']) $(id).value = '';
-    $('mForget').hidden = true;
-    say('info', 'Saved details cleared from this browser.');
-  };
-
-  $('mGo').onclick = async () => {
-    const v = values();
-    if (!v.name || !v.phone || !v.address) {
-      return say('bad', 'Name, phone and address are all required.');
-    }
-    // Persist customer details only. Never the menu code or quantity.
-    const { menuCode, quantity, ...customer } = v;
-    if (!store.write(customer)) {
-      say('info', 'Order details kept for this visit only \u2014 this browser is blocking storage.');
-    }
-    $('mForget').hidden = false;
-
-    if (!ORDER.endpoint) {
-      say('info', 'This app can\u2019t submit to Foosto directly yet, because their order server '
-        + 'has no HTTPS. Your details are saved for next time. '
-        + '<a href="' + ORDER.fallbackUrl + '" target="_blank" rel="noopener">Open Foosto\u2019s order form</a> '
-        + 'and enter menu code <b>' + esc(item.code) + '</b>.');
-      return;
-    }
-
-    const btn = $('mGo');
-    btn.disabled = true; btn.textContent = 'Placing order\u2026';
-    say('info', '');
-    try {
-      const f = ORDER.fields;
-      const body = { [f.menuCode]: v.menuCode, [f.quantity]: v.quantity, [f.name]: v.name,
-                     [f.phone]: v.phone, [f.whatsapp]: v.whatsapp, [f.email]: v.email,
-                     [f.address]: v.address };
-      const res = await fetch(ORDER.endpoint, {
-        method: 'POST',
-        headers: { 'content-type': ORDER.encoding === 'json'
-          ? 'application/json' : 'application/x-www-form-urlencoded' },
-        body: ORDER.encoding === 'json'
-          ? JSON.stringify(body) : new URLSearchParams(body).toString(),
-      });
-      if (!res.ok) throw new Error('The order server replied with HTTP ' + res.status + '.');
-      say('ok', '<b>Order placed.</b> Menu code ' + esc(item.code) + ', quantity ' + esc(v.quantity)
-        + '. Foosto will confirm on ' + esc(v.phone) + '.');
-      btn.textContent = 'Order placed';
-    } catch (err) {
-      // Sheet stays open and every field keeps its value, so nothing is retyped.
-      say('bad', esc(err.message) + ' Your details are still here \u2014 try again.');
-      btn.disabled = false; btn.textContent = 'Place order';
-    }
-  };
 }
 
 /* --- Boot --------------------------------------------------------------- */
@@ -767,28 +801,17 @@ async function boot() {
   }
 }
 
-/* Two different facts, and conflating them is what makes a live mirror look
-   broken: changedAt is when Foosto's menu last actually differed, checkedAt is
-   when we last looked. An overnight menu legitimately doesn't change for
-   hours, so only checkedAt can tell you the pipeline is still alive. */
+/* changedAt is when Foosto's menu last actually differed; checkedAt is only
+   when the Action last looked. The stamp people care about is the first one.
+   Pinned to Dhaka and to 24h so it reads 20:49 for every visitor, rather than
+   silently re-clocking itself to whatever timezone the browser happens to be
+   in -- a Dhaka lunch menu labelled 9:49 AM would just be wrong. */
 function showFreshness(data) {
-  const hhmm = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  const changed = new Date(data.changedAt || data.checkedAt);
-  const checked = new Date(data.checkedAt || data.changedAt);
-  const ageMin = (Date.now() - checked.getTime()) / 60000;
-
-  $('freshness').textContent = hhmm(changed);
+  const t = new Date(data.changedAt || data.checkedAt);
+  if (isNaN(t.getTime())) return;
+  $('freshness').textContent = t.toLocaleTimeString('en-GB',
+    { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: REFRESH_TZ });
   $('freshItem').hidden = false;
-
-  if (ageMin > 150) {
-    // The Action commits a heartbeat at least hourly, so this means it stopped.
-    $('cutoffItem').insertAdjacentHTML('afterend',
-      '<span class="meta-item shut" id="staleWarn">' + icon('ic-refresh')
-      + '<strong>Mirror may be stale</strong> \u2014 last checked ' + hhmm(checked) + '</span>');
-    $('freshNote').textContent = '';
-  } else if (checked - changed > 5 * 60000) {
-    $('freshNote').textContent = ' \u00b7 checked ' + hhmm(checked);
-  }
 }
 
 /* --- Events ------------------------------------------------------------- */
@@ -822,11 +845,19 @@ $('chipRail').addEventListener('click', (e) => {
   state.picked.has(chef) ? state.picked.delete(chef) : state.picked.add(chef);
   render();
 });
+$('tagRail').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  const tag = b.dataset.tag;
+  state.tags.has(tag) ? state.tags.delete(tag) : state.tags.add(tag);
+  render();
+});
 $('fchips').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-chip]');
   if (!b) return;
   if (b.dataset.chip === 'search') { state.q = ''; $('q').value = ''; }
   if (b.dataset.chip === 'chef') state.picked.delete(b.dataset.val);
+  if (b.dataset.chip === 'tag') state.tags.delete(b.dataset.val);
   if (b.dataset.chip === 'price') {
     [state.min, state.max] = state.bounds;
     $('pmin').value = state.min; $('pmax').value = state.max; syncSlider();
@@ -836,15 +867,10 @@ $('fchips').addEventListener('click', (e) => {
 $('clear').addEventListener('click', () => {
   state.q = ''; $('q').value = '';
   state.picked.clear();
+  state.tags.clear();
   [state.min, state.max] = state.bounds;
   $('pmin').value = state.min; $('pmax').value = state.max;
   syncSlider(); render();
-});
-main.addEventListener('click', (e) => {
-  const btn = e.target.closest('.order');
-  if (!btn || btn.disabled) return;
-  const item = state.items.find((i) => i.code === btn.dataset.code);
-  if (item) openSheet(item);
 });
 
 // A horizontal rail under a vertical page traps the wheel: without this the
@@ -904,7 +930,6 @@ if (window.ResizeObserver) {
 }
 measureDock();
 
-tickClock(); setInterval(tickClock, 1000);
 boot();
 </script>
 </body>
