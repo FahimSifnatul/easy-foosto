@@ -12,7 +12,7 @@ on:
     # of those now lands a commit. Scheduled runs are queued and GitHub delays
     # them most at popular times, of which :00 is the worst; '7,37 * * * *'
     # would keep the same cadence off the busiest slots.
-    - cron: '1 * * * *'
+    - cron: '3 * * * *'
   workflow_dispatch:              # manual "Run workflow" button
 
 permissions:
