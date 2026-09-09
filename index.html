@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Preview — Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
+<title>Foosto Tiffin — আজকের ঘরোয়া রান্না</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://menu.foosto.com">
@@ -69,10 +69,10 @@ img{max-width:100%;display:block}
 .controls.docked .controls-inner{padding-bottom:8px}
 .controls.docked .search-input{padding-top:7px;padding-bottom:7px}
 .controls.docked .tool-btn{padding-top:0;padding-bottom:0;height:34px}
-.controls.docked .fbar{margin-top:7px}
+.controls.docked .fbar{margin-top:6px}
 .dock-spacer{height:0}
 
-.search-row{padding-top:10px;display:flex;gap:8px}
+.search-row{padding-top:9px;display:flex;gap:8px}
 .search-wrap{position:relative;flex:1;min-width:0}
 .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);
   width:17px;height:17px;color:#B7A481;pointer-events:none}
@@ -87,21 +87,32 @@ img{max-width:100%;display:block}
 .tool-btn:hover{background:rgba(255,255,255,.15)}
 .tool-btn[aria-expanded=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
-.panel{margin-top:9px;padding:9px 12px;border-radius:10px;
+/* Two columns on phones so Sort and View share a row, with Price and both chip
+   rails spanning the full width beneath them. The rail and price labels sit
+   inline rather than on their own line: five stacked label lines was most of
+   what made this panel tall enough to swallow a phone screen once pinned. */
+.panel{margin-top:8px;padding:8px 10px;border-radius:10px;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-  display:grid;gap:9px}
+  display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;align-items:center}
 /* `hidden` must win at every width. Do NOT re-declare .panel[hidden] in a
    media query — that is what made the toggle look dead on desktop. */
 .panel[hidden]{display:none}
+.panel .rail-field,.panel .price-field{grid-column:1/-1}
+/* Last resort: however many chefs the rail holds, a pinned bar must never own
+   more of the screen than the results it is filtering. */
+.controls.docked .panel{max-height:40vh;overflow-y:auto}
 @media(min-width:700px){
-  .panel{grid-template-columns:minmax(140px,1fr) minmax(180px,1.3fr) auto;gap:10px 16px;align-items:center}
-  .panel .rail-field{grid-column:1/-1}
+  .panel{grid-template-columns:minmax(130px,1fr) auto minmax(190px,1.2fr);gap:8px 14px}
+  .panel .price-field{grid-column:auto}
 }
 .field > span{display:block;font-size:.71rem;color:#C6B392;margin-bottom:3px;letter-spacing:.01em}
 .field > span b{color:#E3AF3F;font-weight:600}
-.field select{width:100%;height:32px;border-radius:8px;font:inherit;font-size:.83rem;
+.field select{width:100%;height:30px;border-radius:8px;font:inherit;font-size:.83rem;
   background:#2A1F15;color:#F3E9D2;border:1px solid rgba(255,255,255,.16);padding:0 7px}
-.slider{position:relative;height:32px;display:flex;align-items:center}
+.rail-field,.price-field{display:flex;align-items:center;gap:9px;min-width:0}
+.rail-field > span,.price-field > span{flex:none;margin-bottom:0;white-space:nowrap}
+.rail-field .chip-rail,.price-field .slider{flex:1;min-width:0}
+.slider{position:relative;height:30px;display:flex;align-items:center}
 .slider .track{position:absolute;left:0;right:0;height:3px;background:rgba(255,255,255,.18);border-radius:2px}
 .slider .fill{position:absolute;height:3px;background:#E3AF3F;border-radius:2px}
 .slider input{position:absolute;left:0;width:100%;margin:0;background:none;pointer-events:none;
@@ -111,14 +122,14 @@ img{max-width:100%;display:block}
 .slider input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;
   background:#F3E9D2;border:2px solid #E3AF3F;cursor:grab}
 .slider input::-moz-range-track{background:none}
-.group-toggle{height:32px;padding:0 13px;border-radius:999px;font-size:.78rem;font-weight:600;
+.group-toggle{height:30px;padding:0 12px;border-radius:999px;font-size:.78rem;font-weight:600;
   background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.14);white-space:nowrap}
 .group-toggle[aria-pressed=true]{background:#E3AF3F;color:#2A1B06;border-color:#E3AF3F}
 
 /* Chef rail doubles as the chef multi-select: tap to filter, tap again to drop. */
-.chip-rail{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip-rail{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chip-rail::-webkit-scrollbar{display:none}
-.chip{flex:none;padding:6px 12px;border-radius:999px;font-size:.8rem;font-weight:600;
+.chip{flex:none;padding:5px 11px;border-radius:999px;font-size:.79rem;font-weight:600;
   background:rgba(255,255,255,.07);color:#E7D9BA;border:1px solid rgba(255,255,255,.12);
   white-space:nowrap;transition:background .15s ease,color .15s ease}
 .chip:hover{background:rgba(255,255,255,.14)}
@@ -130,7 +141,7 @@ img{max-width:100%;display:block}
 .chip:disabled:hover{background:rgba(255,255,255,.07)}
 .tag-chip{font-family:var(--display);font-size:.86rem}
 
-.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px 11px;margin-top:9px;
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:7px;
   font-size:.79rem;color:#D8C6A3}
 .fchip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 5px 0 10px;
   border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
@@ -151,8 +162,15 @@ img{max-width:100%;display:block}
 .hero-stat span{font-size:.8rem;color:var(--ink-soft)}
 
 /* ---------- Chef tiers ---------- */
-.tier{margin-top:8px;scroll-margin-top:calc(var(--barH, 0px) + 14px);
-  content-visibility:auto;contain-intrinsic-size:0 460px}
+/* No content-visibility here, deliberately. With `contain-intrinsic-size:0 460px`
+   every off-screen chef block claimed 460px whether or not it needed it, so a
+   filtered list of six dishes still reserved thousands of phantom pixels. As
+   you scrolled, each block rendered, collapsed to its real height, and the page
+   shrank under your thumb -- which is exactly why dishes seemed to vanish
+   mid-scroll. At 19 dishes it bought nothing. If this list ever grows into the
+   hundreds, bring it back as `contain-intrinsic-size:auto 460px` so each block
+   remembers its measured height instead of guessing the same number for all. */
+.tier{margin-top:8px;scroll-margin-top:calc(var(--barH, 0px) + 14px)}
 .ghead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
   padding:14px 0 10px 14px;margin-top:22px;border-left:4px solid var(--gold)}
 .ghead h2{font-size:1.22rem;font-weight:600;color:var(--ink)}
@@ -291,16 +309,16 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
         </select>
       </div>
       <div class="field">
+        <span>View</span>
+        <button class="group-toggle" id="groupBtn" aria-pressed="true">Grouped by chef</button>
+      </div>
+      <div class="field price-field">
         <span>Price <b id="priceLabel"></b></span>
         <div class="slider">
           <div class="track"></div><div class="fill" id="fill"></div>
           <input type="range" id="pmin" aria-label="Minimum price">
           <input type="range" id="pmax" aria-label="Maximum price">
         </div>
-      </div>
-      <div class="field">
-        <span>View</span>
-        <button class="group-toggle" id="groupBtn" aria-pressed="true">Grouped by chef</button>
       </div>
       <div class="field rail-field">
         <span>Contains</span>
@@ -336,181 +354,11 @@ footer.note{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);
 </button>
 
 <script>
-// Generated by scripts/scrape-menu.mjs. Do not edit by hand.
-window.FOOSTO_MENU = {
-  "source": "https://menu.foosto.com/",
-  "changedAt": "2026-09-09T14:49:57.180Z",
-  "checkedAt": "2026-09-09T14:49:57.180Z",
-  "count": 19,
-  "items": [
-    {
-      "code": "62230",
-      "name": "রুই মাছ টমেটো আলু দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
-      "chef": "Soneka Begum",
-      "price": 180,
-      "available": 9,
-      "images": []
-    },
-    {
-      "code": "62231",
-      "name": "সোনালি মুরগি আলু দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
-      "chef": "Soneka Begum",
-      "price": 192,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "64253",
-      "name": "শিং মাছ টমেটো দিয়ে ঝোল, মিক্সড ভাজি, ডাল ভর্তা ,ভাত,সালাদ",
-      "chef": "Soneka Begum",
-      "price": 171,
-      "available": 9,
-      "images": []
-    },
-    {
-      "code": "68606",
-      "name": "উত্তর বঙ্গের বিখ্যাত ডিম তেলানি,চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত, সালাত",
-      "chef": "Masuma Khatun",
-      "price": 161,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "68750",
-      "name": "সোনালি মুরগি আলু দিয়ে ঝোল, চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত,সালাদ",
-      "chef": "Masuma Khatun",
-      "price": 192,
-      "available": 9,
-      "images": []
-    },
-    {
-      "code": "70486",
-      "name": "রুই মাছের কোপ্তা কারি , চিংড়ি মাছের বড়া, আলু ভর্তা, চিকেন দিয়ে বুটের ডাল,নাজির শাইল চালের ভাত,সালাদ",
-      "chef": "Masuma Khatun",
-      "price": 187,
-      "available": 7,
-      "images": []
-    },
-    {
-      "code": "69387",
-      "name": "সোনালী মুরগী কষা ঝাল ভুনা আলু দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
-      "chef": "Selina Akhter",
-      "price": 191,
-      "available": 15,
-      "images": []
-    },
-    {
-      "code": "69409",
-      "name": "কৈ মাছ ঝোল ভুনা টমেটো দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
-      "chef": "Selina Akhter",
-      "price": 185,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "70830",
-      "name": "চিংড়ি মাছের ভুনা ৪/৫-পিচ টমেটো দিয়ে,ডিম দিয়ে ঢেরস+আলু ভাজি,পুইশাক চিংড়ি মাছ দিয়ে ঝোল,মোজাম্মেল মিনিকেট ভাত,সালাদ।",
-      "chef": "Selina Akhter",
-      "price": 200,
-      "available": 12,
-      "images": []
-    },
-    {
-      "code": "69520",
-      "name": "ডিম ভাজা পিঁয়াজ কাঁচামরিচ দিয়ে, আলুর ভর্তা,ঘন ডাল, নাজির চাল এর ভাত",
-      "chef": "Tanzima Akther",
-      "price": 161,
-      "available": 5,
-      "images": []
-    },
-    {
-      "code": "69860",
-      "name": "আস্ত ডিম ভুনা,,ডাল, আলুর ভর্তা, নাজির চাল।",
-      "chef": "Tanzima Akther",
-      "price": 161,
-      "available": 6,
-      "images": []
-    },
-    {
-      "code": "70802",
-      "name": "সোনালী মুরগী মাংস ঝাল ভুনা , মজাম্মেল মিনিকেট চালের ভাত,লাউ দিয়ে ডাল , ভর্তা , বেগুন ভাজা, সালাত।",
-      "chef": "Sultana Razia",
-      "price": 192,
-      "available": 15,
-      "images": []
-    },
-    {
-      "code": "70807",
-      "name": "সরিষার তেল দুই রকমের ডাল দিয়ে সোনা মশরী চাউলের মাখা মাখা খিচুড়ি, সোনালী মুরগী মাংস ঝাল ভুনা,বেগুন ভাজা, আচার, সালাত",
-      "chef": "Sultana Razia",
-      "price": 224,
-      "available": 9,
-      "images": []
-    },
-    {
-      "code": "71222",
-      "name": "সোনালি মুরগি ভুনা,,,করল্লা ভাজি,,,সাদা সবজি,,,এবং ভাত।",
-      "chef": "Amena",
-      "price": 192,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "71223",
-      "name": "সাদা পোলাও,,,সোনালি মুরগি ভুনা,,,সাদা সবজি,,,এবং সালাদ।",
-      "chef": "Amena",
-      "price": 218,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "71224",
-      "name": "আটার রুটি (৪)পিস,,,সোনালি মুরগি ভুনা,,,সাদা সবজি।",
-      "chef": "Amena",
-      "price": 189,
-      "available": 10,
-      "images": []
-    },
-    {
-      "code": "71225",
-      "name": "কাতল মাছ ভুনা ডাল ভুনা বেগুন ভর্তা ভাত সালাত",
-      "chef": "Samanta",
-      "price": 176,
-      "available": 7,
-      "images": []
-    },
-    {
-      "code": "71226",
-      "name": "আলু দিয়ে ডিম কারি ডাল ভুনা বেগুন ভর্তা ভাত সালাত",
-      "chef": "Samanta",
-      "price": 155,
-      "available": 7,
-      "images": []
-    },
-    {
-      "code": "71227",
-      "name": "খুদের ভাত আলু ভর্তা বেগুন ভর্তা শুঁটকি ভর্তা ডাল ভর্তা চিংড়ি মাছের বড়া সা",
-      "chef": "Samanta",
-      "price": 171,
-      "available": 8,
-      "images": [
-        "static-site/img/location.png",
-        "static-site/img/icon-03.png",
-        "static-site/img/way.png",
-        "static-site/img/app-phn-logo.png",
-        "static-site/img/phn.png"
-      ]
-    }
-  ]
-};
-</script>
-
-<script>
 /* ===================================================================== */
 // Where the Order button sends you. admin.foosto.com serves HTTP only, and
 // this page is HTTPS on GitHub Pages -- fine here, because a top-level
 // navigation is not mixed content the way a fetch() or an <img> would be.
-const ORDER_URL    = 'http://admin.foosto.com/order/create/';
+const ORDER_URL    = 'http://admin.foosto.com/create/';
 const MENU_FILE    = 'menu.js';
 const LOAD_TIMEOUT = 15000;
 const REFRESH_TZ   = 'Asia/Dhaka';               // menu times are Dhaka times, wherever you read this
@@ -582,7 +430,6 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
    so the page also works from file:// while editing locally. The timestamp
    defeats caching, so every load gets whatever the Action last committed. */
 function loadMenu() {
-  if (window.FOOSTO_MENU) return Promise.resolve(window.FOOSTO_MENU);  // preview build
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
     const done = (fn, arg) => { clearTimeout(timer); s.remove(); fn(arg); };
@@ -815,23 +662,34 @@ function showFreshness(data) {
 }
 
 /* --- Events ------------------------------------------------------------- */
+/* Narrowing a filter shortens the document under you. The browser clamps your
+   scroll position to the new, shorter page, which lands you somewhere arbitrary
+   -- frequently past the very dishes you just asked for, with the rest hidden
+   behind the pinned bar. Snapping back to the top of the results makes the
+   six dishes it promised you actually be the six dishes you see. */
+function revealResults() {
+  const bar = controls.classList.contains('docked') ? controls.offsetHeight : 0;
+  const top = main.getBoundingClientRect().top + window.scrollY - bar - 8;
+  if (window.scrollY > top) window.scrollTo(0, Math.max(0, top));
+}
+
 let debounce;
 $('q').addEventListener('input', (e) => {
   clearTimeout(debounce);
-  debounce = setTimeout(() => { state.q = e.target.value; render(); }, 120);
+  debounce = setTimeout(() => { state.q = e.target.value; render(); revealResults(); }, 120);
 });
-$('sort').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
+$('sort').addEventListener('change', (e) => { state.sort = e.target.value; render(); revealResults(); });
 $('pmin').addEventListener('input', (e) => {
-  state.min = Math.min(+e.target.value, state.max); e.target.value = state.min; syncSlider(); render();
+  state.min = Math.min(+e.target.value, state.max); e.target.value = state.min; syncSlider(); render(); revealResults();
 });
 $('pmax').addEventListener('input', (e) => {
-  state.max = Math.max(+e.target.value, state.min); e.target.value = state.max; syncSlider(); render();
+  state.max = Math.max(+e.target.value, state.min); e.target.value = state.max; syncSlider(); render(); revealResults();
 });
 $('groupBtn').addEventListener('click', (e) => {
   state.grouped = !state.grouped;
   e.target.setAttribute('aria-pressed', String(state.grouped));
   e.target.textContent = state.grouped ? 'Grouped by chef' : 'One flat list';
-  render();
+  render(); revealResults();
 });
 $('toggleFilters').addEventListener('click', (e) => {
   const open = $('panel').hidden;
@@ -843,14 +701,14 @@ $('chipRail').addEventListener('click', (e) => {
   if (!b) return;
   const chef = b.dataset.chef;
   state.picked.has(chef) ? state.picked.delete(chef) : state.picked.add(chef);
-  render();
+  render(); revealResults();
 });
 $('tagRail').addEventListener('click', (e) => {
   const b = e.target.closest('.chip');
   if (!b) return;
   const tag = b.dataset.tag;
   state.tags.has(tag) ? state.tags.delete(tag) : state.tags.add(tag);
-  render();
+  render(); revealResults();
 });
 $('fchips').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-chip]');
@@ -862,7 +720,7 @@ $('fchips').addEventListener('click', (e) => {
     [state.min, state.max] = state.bounds;
     $('pmin').value = state.min; $('pmax').value = state.max; syncSlider();
   }
-  render();
+  render(); revealResults();
 });
 $('clear').addEventListener('click', () => {
   state.q = ''; $('q').value = '';
@@ -870,7 +728,7 @@ $('clear').addEventListener('click', () => {
   state.tags.clear();
   [state.min, state.max] = state.bounds;
   $('pmin').value = state.min; $('pmax').value = state.max;
-  syncSlider(); render();
+  syncSlider(); render(); revealResults();
 });
 
 // A horizontal rail under a vertical page traps the wheel: without this the
