@@ -7,9 +7,12 @@ on:
     #
     # GitHub's floor is one run every 5 minutes. A "* * * * *" cron commits
     # cleanly but simply will not run every minute, so don't write one.
-    # Runs are also queued and can be delayed at busy times, which is why these
-    # start at :02 and :17 rather than on the hour.
-    - cron: '*/30 * * * *'
+    #
+    # This fires on the hour and the half hour, ~48 times a day, and every one
+    # of those now lands a commit. Scheduled runs are queued and GitHub delays
+    # them most at popular times, of which :00 is the worst; '7,37 * * * *'
+    # would keep the same cadence off the busiest slots.
+    - cron: '1 * * * *'
   workflow_dispatch:              # manual "Run workflow" button
 
 permissions:
@@ -38,13 +41,24 @@ jobs:
         id: scrape
         run: node scripts/scrape-menu.mjs menu.js
 
-      - name: Commit if the menu changed
-        if: steps.scrape.outputs.changed == 'true'
+      - name: Commit every run
         env:
           BRANCH: ${{ github.ref_name }}
+          CONTENT_CHANGED: ${{ steps.scrape.outputs.content_changed }}
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # Every tick commits, whether or not the dishes changed. checkedAt is
+          # rewritten on each run, so menu.js genuinely differs every time and
+          # the site can show a refresh time that actually moves. The message
+          # distinguishes the two cases, because ~48 identically-named commits
+          # a day would make the history useless for spotting a real change.
+          if [ "$CONTENT_CHANGED" = "true" ]; then
+            MSG="Menu refresh $(date -u +'%Y-%m-%d %H:%MZ')"
+          else
+            MSG="Menu heartbeat $(date -u +'%Y-%m-%d %H:%MZ')"
+          fi
 
           # menu.js is regenerated in full every run, so there is never anything
           # to merge: we just need the new file to land on the current branch tip.
@@ -65,11 +79,14 @@ jobs:
             git add menu.js
 
             if git diff --cached --quiet; then
-              echo "Branch already has this exact menu. Nothing to commit."
-              exit 0
+              # Should be unreachable: checkedAt is rewritten on every run, so
+              # menu.js always differs. Kept so that "always commit" holds even
+              # if that ever stops being true, rather than silently skipping.
+              git commit --allow-empty -m "$MSG"
+            else
+              git commit -m "$MSG"
             fi
 
-            git commit -m "Menu refresh $(date -u +'%Y-%m-%d %H:%MZ')"
             if git push origin "HEAD:$BRANCH"; then
               exit 0
             fi
