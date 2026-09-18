@@ -2,7 +2,7 @@
 window.FOOSTO_MENU = {
   "source": "https://menu.foosto.com/",
   "changedAt": "2026-09-18T20:26:04.869Z",
-  "checkedAt": "2026-09-18T20:26:04.869Z",
+  "checkedAt": "2026-09-18T23:01:06.034Z",
   "count": 6,
   "items": [
     {
